@@ -1,0 +1,16 @@
+{
+  "name": "Little Learners",
+  "short_name": "Little Learners",
+  "description": "Baby & toddler learning flashcards and games",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#5FC9F3",
+  "theme_color": "#5FC9F3",
+  "orientation": "any",
+  "icons": [
+    { "src": "img/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "img/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "img/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

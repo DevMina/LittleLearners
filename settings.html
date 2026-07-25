@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Little Learners – Parent Settings</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#5FC9F3">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="lock-screen" id="lockScreen">
+  <div class="lock-card">
+    <div class="lock-icon">🔒</div>
+    <h2>Parent Zone</h2>
+    <p>Hold the button for 2 seconds to unlock settings.<br>(Little ones usually can't hold still that long!)</p>
+    <button class="hold-btn" id="holdBtn">
+      <span class="hold-fill" id="holdFill"></span>
+      <span class="hold-label">Hold to unlock</span>
+    </button>
+    <button class="back-btn" style="margin-top:18px;" onclick="location.href='index.html'">&larr; Back to app</button>
+  </div>
+</div>
+
+<div class="page" id="settingsPage" style="display:none;">
+  <div class="top-bar">
+    <button class="back-btn" onclick="location.href='index.html'">&larr; Home</button>
+  </div>
+  <div class="title-wrap"><h1>Parent Settings</h1></div>
+
+  <div class="settings-panel">
+
+    <div class="settings-group">
+      <h3>Voice</h3>
+      <label class="settings-row">
+        <span>Reading voice</span>
+        <select id="voiceSelect"></select>
+      </label>
+      <label class="settings-row">
+        <span>Speaking speed</span>
+        <input type="range" id="rateRange" min="0.5" max="1.2" step="0.05">
+      </label>
+      <label class="settings-row">
+        <span>Volume</span>
+        <input type="range" id="volumeRange" min="0" max="1" step="0.05">
+      </label>
+      <label class="settings-row">
+        <span>Sound effects</span>
+        <input type="checkbox" id="sfxCheck">
+      </label>
+      <button class="speak-btn" id="testVoiceBtn">🔊 Test voice</button>
+    </div>
+
+    <div class="settings-group">
+      <h3>Screen time</h3>
+      <label class="settings-row">
+        <span>Session timer</span>
+        <select id="sessionSelect">
+          <option value="0">Off</option>
+          <option value="5">5 minutes</option>
+          <option value="10">10 minutes</option>
+          <option value="15">15 minutes</option>
+          <option value="20">20 minutes</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="settings-group">
+      <h3>Decks shown on home screen</h3>
+      <div id="deckToggles" class="deck-toggle-list"></div>
+    </div>
+
+    <div class="settings-group">
+      <h3>Progress</h3>
+      <div id="progressSummary" class="progress-summary"></div>
+      <button class="icon-btn danger-btn" id="resetBtn">🗑️ Reset all progress</button>
+    </div>
+
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/app.js"></script>
+<script src="js/settings.js"></script>
+</body>
+</html>

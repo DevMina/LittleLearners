@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Little Learners – My Cards</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#5FC9F3">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="page">
+  <div class="top-bar">
+    <button class="back-btn" onclick="location.href='index.html'">&larr; Home</button>
+    <button class="icon-btn" id="addBtn">➕ New card</button>
+  </div>
+
+  <div class="title-wrap">
+    <h1>My Cards</h1>
+    <p>Add photos of family, pets, and favorite things!</p>
+  </div>
+
+  <div class="tile-grid" id="customGrid"></div>
+  <p id="emptyMsg" class="empty-msg" style="display:none;">No custom cards yet. Tap "New card" to add your first one!</p>
+</div>
+
+<!-- Add / edit card modal -->
+<div class="win-banner" id="addModal" style="display:none;">
+  <div class="win-card add-card-form">
+    <h2>New card</h2>
+    <input type="file" id="photoInput" accept="image/*" capture="environment" class="file-input">
+    <img id="photoPreview" class="photo-preview" style="display:none;">
+    <input type="text" id="labelInput" placeholder="What is it? (e.g. Grandma)" class="text-input">
+
+    <button class="speak-btn" id="recordBtn">🎙️ Hold to record word</button>
+    <div id="recordStatus" class="record-status"></div>
+    <audio id="audioPreview" controls style="display:none;width:100%;margin-top:8px;"></audio>
+
+    <div class="controls-row" style="margin-top:18px;">
+      <button class="icon-btn" id="cancelBtn">Cancel</button>
+      <button class="play-again-btn" id="saveBtn">Save card</button>
+    </div>
+  </div>
+</div>
+
+<!-- View card modal -->
+<div class="win-banner" id="viewModal" style="display:none;">
+  <div class="win-card">
+    <img id="viewPhoto" class="photo-preview" style="display:block;">
+    <h2 id="viewLabel"></h2>
+    <div class="controls-row">
+      <button class="speak-btn" id="viewPlayBtn">🔊 Play</button>
+      <button class="icon-btn danger-btn" id="viewDeleteBtn">🗑️ Delete</button>
+    </div>
+    <button class="icon-btn" id="viewCloseBtn" style="margin-top:14px;">Close</button>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/custom.js"></script>
+</body>
+</html>

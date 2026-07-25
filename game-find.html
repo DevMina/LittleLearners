@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Little Learners – Find It</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#5FC9F3">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="page">
+  <div class="top-bar">
+    <button class="back-btn" onclick="location.href='index.html'">&larr; Home</button>
+    <button class="icon-btn" id="repeatBtn">🔊 Repeat</button>
+  </div>
+
+  <div class="title-wrap">
+    <h1>Find It!</h1>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-pill">⭐ Score: <span id="scoreCount">0</span></div>
+    <div class="stat-pill">🎯 Round: <span id="roundCount">1</span>/8</div>
+  </div>
+
+  <div class="difficulty-row" id="difficultyRow">
+    <span>Options:</span>
+    <button class="diff-btn" data-n="2">2</button>
+    <button class="diff-btn" data-n="4">4</button>
+    <button class="diff-btn" data-n="6">6</button>
+  </div>
+
+  <div class="find-prompt" id="prompt">Find the...</div>
+
+  <div class="game-board find-grid" id="board"></div>
+</div>
+
+<div class="win-banner" id="winBanner" style="display:none;">
+  <div class="confetti-host" id="confettiHost"></div>
+  <div class="win-card">
+    <h2>🌟 All done!</h2>
+    <p id="winStats">Nice work!</p>
+    <button class="play-again-btn" id="playAgainBtn">Play again</button>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/app.js"></script>
+<script src="js/game-find.js"></script>
+</body>
+</html>

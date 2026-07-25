@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Little Learners</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#5FC9F3">
+<link rel="apple-touch-icon" href="img/icon-192.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="page">
+
+  <div class="top-bar">
+    <button class="icon-btn" onclick="location.href='settings.html'" aria-label="Parent settings">⚙️ Parents</button>
+    <button class="icon-btn" id="installBtn" style="display:none;">⬇️ Install app</button>
+  </div>
+
+  <div class="title-wrap">
+    <svg class="mascot" id="mascot" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="60" cy="70" rx="42" ry="38" fill="#FFD93D"/>
+      <circle cx="44" cy="62" r="7" fill="#1F3A5F"/>
+      <circle cx="76" cy="62" r="7" fill="#1F3A5F"/>
+      <circle cx="46" cy="60" r="2" fill="#fff"/>
+      <circle cx="78" cy="60" r="2" fill="#fff"/>
+      <path d="M42 82 Q60 96 78 82" stroke="#1F3A5F" stroke-width="4" stroke-linecap="round" fill="none"/>
+      <ellipse cx="30" cy="76" rx="7" ry="5" fill="#FF9F45" opacity="0.6"/>
+      <ellipse cx="90" cy="76" rx="7" ry="5" fill="#FF9F45" opacity="0.6"/>
+      <ellipse cx="60" cy="32" rx="10" ry="14" fill="#FFD93D"/>
+    </svg>
+    <h1>Little Learners</h1>
+    <p>Tap, learn, and play!</p>
+  </div>
+
+  <div class="section-label">Flashcard decks</div>
+  <div class="tile-grid" id="deckTiles"></div>
+
+  <div class="section-label">Games</div>
+  <div class="tile-grid">
+    <button class="tile orange" onclick="location.href='game-match.html?deck=animals'">
+      <span class="tile-emoji">🧩</span>Memory Match
+    </button>
+    <button class="tile coral" onclick="location.href='game-find.html?deck=animals'">
+      <span class="tile-emoji">🔍</span>Find It!
+    </button>
+    <button class="tile grape" onclick="location.href='trace.html?mode=letters'">
+      <span class="tile-emoji">✏️</span>Tracing
+    </button>
+    <button class="tile grass" onclick="location.href='custom.html'">
+      <span class="tile-emoji">📷</span>My Cards
+    </button>
+  </div>
+
+</div>
+<script src="js/data.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/app.js"></script>
+<script>
+  // Build deck tiles from settings (parent-enabled decks only)
+  const tileMeta = {
+    animals: { color: "coral", emoji: "🐶" },
+    colors: { color: "grape", emoji: "🎨" },
+    numbers: { color: "grass", emoji: "🔢" },
+    shapes: { color: "sun", emoji: "⭐" },
+    letters: { color: "sky", emoji: "🔤" },
+  };
+  const enabled = getSettings().enabledDecks;
+  const wrap = document.getElementById("deckTiles");
+  enabled.forEach((key) => {
+    if (!DECKS[key]) return;
+    const meta = tileMeta[key] || { color: "sky", emoji: "🃏" };
+    const stars = getDeckStars(key);
+    const btn = document.createElement("button");
+    btn.className = "tile " + meta.color;
+    btn.onclick = () => (location.href = "cards.html?deck=" + key);
+    btn.innerHTML = `<span class="tile-emoji">${meta.emoji}</span>${DECKS[key].title}${stars ? '<span class="tile-star">⭐</span>' : ""}`;
+    wrap.appendChild(btn);
+  });
+
+  document.getElementById("mascot").addEventListener("click", function () {
+    mascotBounce(this, "cheer");
+    speak("Hi! Let's play!");
+  });
+  window.addEventListener("load", () => mascotBounce(document.getElementById("mascot")));
+
+  // PWA install prompt
+  let deferredPrompt = null;
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById("installBtn").style.display = "inline-block";
+  });
+  document.getElementById("installBtn").addEventListener("click", async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    document.getElementById("installBtn").style.display = "none";
+  });
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => navigator.serviceWorker.register("service-worker.js").catch(() => {}));
+  }
+</script>
+</body>
+</html>

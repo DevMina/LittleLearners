@@ -1,0 +1,98 @@
+// ---------- Hold-to-unlock gate ----------
+const holdBtn = document.getElementById("holdBtn");
+const holdFill = document.getElementById("holdFill");
+const lockScreen = document.getElementById("lockScreen");
+const settingsPage = document.getElementById("settingsPage");
+const HOLD_MS = 2000;
+let holdTimer = null;
+let holdStart = null;
+
+function startHold() {
+  holdStart = Date.now();
+  holdFill.style.transition = `width ${HOLD_MS}ms linear`;
+  requestAnimationFrame(() => (holdFill.style.width = "100%"));
+  holdTimer = setTimeout(unlock, HOLD_MS);
+}
+function cancelHold() {
+  clearTimeout(holdTimer);
+  holdFill.style.transition = "width .2s ease";
+  holdFill.style.width = "0%";
+}
+function unlock() {
+  lockScreen.style.display = "none";
+  settingsPage.style.display = "flex";
+  initSettingsPage();
+}
+["mousedown", "touchstart"].forEach((ev) => holdBtn.addEventListener(ev, startHold));
+["mouseup", "mouseleave", "touchend", "touchcancel"].forEach((ev) => holdBtn.addEventListener(ev, cancelHold));
+
+// ---------- Settings panel ----------
+function populateVoices() {
+  const select = document.getElementById("voiceSelect");
+  const voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+  const current = getSettings().voiceName;
+  select.innerHTML = '<option value="">Default voice</option>';
+  voices
+    .filter((v) => v.lang.startsWith("en"))
+    .forEach((v) => {
+      const opt = document.createElement("option");
+      opt.value = v.name;
+      opt.textContent = v.name + (v.localService ? "" : " (online)");
+      if (v.name === current) opt.selected = true;
+      select.appendChild(opt);
+    });
+}
+
+function initSettingsPage() {
+  const s = getSettings();
+  document.getElementById("rateRange").value = s.rate;
+  document.getElementById("volumeRange").value = s.volume;
+  document.getElementById("sfxCheck").checked = s.sfx;
+  document.getElementById("sessionSelect").value = String(s.sessionMinutes);
+
+  populateVoices();
+  if (window.speechSynthesis) {
+    window.speechSynthesis.onvoiceschanged = populateVoices;
+  }
+
+  document.getElementById("voiceSelect").addEventListener("change", (e) => saveSettings({ voiceName: e.target.value }));
+  document.getElementById("rateRange").addEventListener("input", (e) => saveSettings({ rate: parseFloat(e.target.value) }));
+  document.getElementById("volumeRange").addEventListener("input", (e) => saveSettings({ volume: parseFloat(e.target.value) }));
+  document.getElementById("sfxCheck").addEventListener("change", (e) => saveSettings({ sfx: e.target.checked }));
+  document.getElementById("sessionSelect").addEventListener("change", (e) => saveSettings({ sessionMinutes: parseInt(e.target.value, 10) }));
+  document.getElementById("testVoiceBtn").addEventListener("click", () => speak("Hi! This is how I sound."));
+
+  // Deck toggles
+  const list = document.getElementById("deckToggles");
+  list.innerHTML = "";
+  Object.keys(DECKS).forEach((key) => {
+    const row = document.createElement("label");
+    row.className = "settings-row";
+    const enabled = s.enabledDecks.includes(key);
+    row.innerHTML = `<span>${DECKS[key].title}</span><input type="checkbox" ${enabled ? "checked" : ""} data-deck="${key}">`;
+    row.querySelector("input").addEventListener("change", (e) => {
+      const cur = getSettings().enabledDecks;
+      const next = e.target.checked ? [...new Set([...cur, key])] : cur.filter((k) => k !== key);
+      saveSettings({ enabledDecks: next });
+    });
+    list.appendChild(row);
+  });
+
+  // Progress summary
+  const progWrap = document.getElementById("progressSummary");
+  progWrap.innerHTML = "";
+  Object.keys(DECKS).forEach((key) => {
+    const stars = getDeckStars(key);
+    const row = document.createElement("div");
+    row.className = "progress-row";
+    row.innerHTML = `<span>${DECKS[key].title}</span><span>${stars ? "⭐ Complete" : "— Not yet"}</span>`;
+    progWrap.appendChild(row);
+  });
+
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    if (confirm("Reset all stars and progress? This can't be undone.")) {
+      resetAllProgress();
+      initSettingsPage();
+    }
+  });
+}
