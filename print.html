@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Little Learners – Print Cards</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#5FC9F3">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="page no-print">
+  <div class="top-bar">
+    <button class="back-btn" onclick="location.href='index.html'">&larr; Home</button>
+    <button class="speak-btn" id="printBtn">🖨️ Print</button>
+  </div>
+
+  <div class="title-wrap">
+    <h1>Print Cards</h1>
+    <p>Pick a deck, then print or save as PDF</p>
+  </div>
+
+  <div class="word-bank" id="deckPicker" style="max-width:640px;"></div>
+  <p class="backup-note" style="max-width:640px;">Tip: in the print dialog, choose "Save as PDF" as the destination to get a PDF file instead of printing.</p>
+</div>
+
+<div id="printSheet" class="print-sheet"></div>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script src="js/print.js"></script>
+</body>
+</html>

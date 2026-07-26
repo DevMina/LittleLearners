@@ -1,3 +1,5 @@
+if (!requireProfile()) { /* redirecting to profile picker */ }
+
 // ---------- IndexedDB helper for custom cards (photos + audio blobs) ----------
 const DB_NAME = "little_learners_custom";
 const STORE = "cards";
@@ -59,9 +61,12 @@ let pendingPhotoDataUrl = null;
 let pendingAudioBlob = null;
 let mediaRecorder = null;
 let recordedChunks = [];
+let editingCardId = null; // null = creating a new card; otherwise the id of the card being edited
 
 async function refreshGrid() {
-  const cards = await dbGetAll();
+  const all = await dbGetAll();
+  const profileId = getActiveProfileId();
+  const cards = all.filter((c) => c.profileId === profileId);
   grid.innerHTML = "";
   emptyMsg.style.display = cards.length ? "none" : "block";
   cards.forEach((card) => {
@@ -77,11 +82,30 @@ async function refreshGrid() {
 function resetForm() {
   pendingPhotoDataUrl = null;
   pendingAudioBlob = null;
+  editingCardId = null;
   photoInput.value = "";
   labelInput.value = "";
   photoPreview.style.display = "none";
   audioPreview.style.display = "none";
   recordStatus.textContent = "";
+  document.getElementById("addModalTitle").textContent = "New card";
+}
+
+function openEditForm(card) {
+  resetForm();
+  editingCardId = card.id;
+  pendingPhotoDataUrl = card.photoDataUrl;
+  pendingAudioBlob = card.audioBlob || null;
+  labelInput.value = card.label;
+  photoPreview.src = card.photoDataUrl;
+  photoPreview.style.display = "block";
+  if (card.audioBlob) {
+    audioPreview.src = URL.createObjectURL(card.audioBlob);
+    audioPreview.style.display = "block";
+    recordStatus.textContent = "Existing recording — record again to replace it.";
+  }
+  document.getElementById("addModalTitle").textContent = "Edit card";
+  addModal.style.display = "flex";
 }
 
 document.getElementById("addBtn").addEventListener("click", () => {
@@ -145,7 +169,8 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
     return;
   }
   const card = {
-    id: "custom_" + Date.now(),
+    id: editingCardId || "custom_" + Date.now(),
+    profileId: getActiveProfileId(),
     label: labelInput.value.trim(),
     photoDataUrl: pendingPhotoDataUrl,
     audioBlob: pendingAudioBlob || null,
@@ -174,6 +199,10 @@ function playCardSound(card) {
   }
 }
 document.getElementById("viewPlayBtn").addEventListener("click", () => playCardSound(currentViewCard));
+document.getElementById("viewEditBtn").addEventListener("click", () => {
+  viewModal.style.display = "none";
+  openEditForm(currentViewCard);
+});
 document.getElementById("viewCloseBtn").addEventListener("click", () => (viewModal.style.display = "none"));
 document.getElementById("viewDeleteBtn").addEventListener("click", async () => {
   if (confirm("Delete this card?")) {

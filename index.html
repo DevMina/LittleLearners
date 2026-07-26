@@ -14,11 +14,16 @@
 
   <div class="top-bar">
     <button class="icon-btn" onclick="location.href='settings.html'" aria-label="Parent settings">⚙️ Parents</button>
-    <button class="icon-btn" id="installBtn" style="display:none;">⬇️ Install app</button>
+    <button class="icon-btn" id="installBtn" style="display:none;" aria-label="Install app">⬇️ Install app</button>
+  </div>
+
+  <div class="home-topline">
+    <button class="profile-chip" id="profileChip" aria-label="Switch learner"></button>
+    <div class="streak-chip" id="streakChip" style="display:none;"></div>
   </div>
 
   <div class="title-wrap">
-    <svg class="mascot" id="mascot" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg class="mascot" id="mascot" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" role="button" aria-label="Say hello" tabindex="0">
       <ellipse cx="60" cy="70" rx="42" ry="38" fill="#FFD93D"/>
       <circle cx="44" cy="62" r="7" fill="#1F3A5F"/>
       <circle cx="76" cy="62" r="7" fill="#1F3A5F"/>
@@ -28,6 +33,20 @@
       <ellipse cx="30" cy="76" rx="7" ry="5" fill="#FF9F45" opacity="0.6"/>
       <ellipse cx="90" cy="76" rx="7" ry="5" fill="#FF9F45" opacity="0.6"/>
       <ellipse cx="60" cy="32" rx="10" ry="14" fill="#FFD93D"/>
+      <g id="accessoryBow" class="mascot-accessory" style="display:none;">
+        <path d="M50 46 L38 38 L38 54 Z" fill="#FF6B6B"/>
+        <path d="M70 46 L82 38 L82 54 Z" fill="#FF6B6B"/>
+        <circle cx="60" cy="46" r="5" fill="#FF6B6B"/>
+      </g>
+      <g id="accessoryHat" class="mascot-accessory" style="display:none;">
+        <path d="M40 30 L60 6 L80 30 Z" fill="#9B72CF"/>
+        <circle cx="60" cy="6" r="5" fill="#FFD93D"/>
+      </g>
+      <g id="accessoryGlasses" class="mascot-accessory" style="display:none;">
+        <circle cx="44" cy="62" r="10" fill="none" stroke="#1F3A5F" stroke-width="3"/>
+        <circle cx="76" cy="62" r="10" fill="none" stroke="#1F3A5F" stroke-width="3"/>
+        <line x1="54" y1="62" x2="66" y2="62" stroke="#1F3A5F" stroke-width="3"/>
+      </g>
     </svg>
     <h1>Little Learners</h1>
     <p>Tap, learn, and play!</p>
@@ -36,7 +55,7 @@
   <div class="section-label">Flashcard decks</div>
   <div class="tile-grid" id="deckTiles"></div>
 
-  <div class="section-label">Games</div>
+  <div class="section-label">Games & activities</div>
   <div class="tile-grid">
     <button class="tile orange" onclick="location.href='game-match.html?deck=animals'">
       <span class="tile-emoji">🧩</span>Memory Match
@@ -47,16 +66,45 @@
     <button class="tile grape" onclick="location.href='trace.html?mode=letters'">
       <span class="tile-emoji">✏️</span>Tracing
     </button>
-    <button class="tile grass" onclick="location.href='custom.html'">
+    <button class="tile grass" onclick="location.href='sentence.html'">
+      <span class="tile-emoji">💬</span>Sentence Builder
+    </button>
+    <button class="tile sky" onclick="location.href='custom.html'">
       <span class="tile-emoji">📷</span>My Cards
+    </button>
+    <button class="tile sun" onclick="location.href='digest.html'">
+      <span class="tile-emoji">📊</span>My Progress
     </button>
   </div>
 
 </div>
 <script src="js/data.js"></script>
+<script src="js/profiles.js"></script>
 <script src="js/storage.js"></script>
 <script src="js/app.js"></script>
 <script>
+  if (!requireProfile()) { /* redirecting to profile picker */ }
+
+  const activeProfile = getActiveProfile();
+  if (activeProfile) {
+    const chip = document.getElementById("profileChip");
+    chip.innerHTML = `<span>${activeProfile.emoji}</span> ${activeProfile.name}`;
+    chip.addEventListener("click", () => (location.href = "profiles.html"));
+
+    const streak = getStreak();
+    if (streak > 1) {
+      const streakChip = document.getElementById("streakChip");
+      streakChip.style.display = "inline-block";
+      streakChip.textContent = "🔥 " + streak + " day streak";
+    }
+
+    // Mascot unlocks based on total stars earned
+    const totalStars = getTotalStars();
+    if (totalStars >= 3) document.getElementById("accessoryBow").style.display = "block";
+    if (totalStars >= 7) document.getElementById("accessoryHat").style.display = "block";
+    if (totalStars >= 13) document.getElementById("accessoryGlasses").style.display = "block";
+  }
+
   // Build deck tiles from settings (parent-enabled decks only)
   const tileMeta = {
     animals: { color: "coral", emoji: "🐶" },
@@ -64,6 +112,12 @@
     numbers: { color: "grass", emoji: "🔢" },
     shapes: { color: "sun", emoji: "⭐" },
     letters: { color: "sky", emoji: "🔤" },
+    vehicles: { color: "sky", emoji: "🚗" },
+    food: { color: "coral", emoji: "🍎" },
+    bodyParts: { color: "grape", emoji: "✋" },
+    emotions: { color: "sun", emoji: "😄" },
+    opposites: { color: "grass", emoji: "⬆️" },
+    sightWords: { color: "orange", emoji: "💬" },
   };
   const enabled = getSettings().enabledDecks;
   const wrap = document.getElementById("deckTiles");
@@ -81,6 +135,9 @@
   document.getElementById("mascot").addEventListener("click", function () {
     mascotBounce(this, "cheer");
     speak("Hi! Let's play!");
+  });
+  document.getElementById("mascot").addEventListener("keydown", function (e) {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); this.click(); }
   });
   window.addEventListener("load", () => mascotBounce(document.getElementById("mascot")));
 

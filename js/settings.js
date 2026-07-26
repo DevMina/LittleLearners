@@ -95,4 +95,119 @@ function initSettingsPage() {
       initSettingsPage();
     }
   });
+
+  document.getElementById("manageProfilesBtn").addEventListener("click", () => (location.href = "profiles.html"));
+
+  document.getElementById("exportBtn").addEventListener("click", exportBackup);
+  document.getElementById("importBtn").addEventListener("click", () => document.getElementById("importFile").click());
+  document.getElementById("importFile").addEventListener("change", importBackup);
+}
+
+// ---------- Backup: export / import (settings + profiles + progress + custom cards) ----------
+const CUSTOM_DB_NAME = "little_learners_custom";
+const CUSTOM_STORE = "cards";
+
+function openCustomDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(CUSTOM_DB_NAME, 1);
+    req.onupgradeneeded = () => req.result.createObjectStore(CUSTOM_STORE, { keyPath: "id" });
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+async function getAllCustomCards() {
+  const db = await openCustomDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(CUSTOM_STORE, "readonly");
+    const req = tx.objectStore(CUSTOM_STORE).getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+}
+async function putCustomCard(card) {
+  const db = await openCustomDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(CUSTOM_STORE, "readwrite");
+    tx.objectStore(CUSTOM_STORE).put(card);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+function blobToBase64(blob) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.readAsDataURL(blob);
+  });
+}
+function base64ToBlob(dataUrl) {
+  return fetch(dataUrl).then((r) => r.blob());
+}
+
+async function exportBackup() {
+  const status = document.getElementById("backupStatus");
+  status.textContent = "Preparing backup…";
+  const profiles = getProfiles();
+  const progressByProfile = {};
+  profiles.forEach((p) => {
+    const raw = localStorage.getItem(LS_PROGRESS_PREFIX + p.id);
+    if (raw) progressByProfile[p.id] = JSON.parse(raw);
+  });
+  const customCardsRaw = await getAllCustomCards();
+  const customCards = await Promise.all(
+    customCardsRaw.map(async (c) => ({
+      ...c,
+      audioBlob: undefined,
+      audioBase64: c.audioBlob ? await blobToBase64(c.audioBlob) : null,
+    }))
+  );
+
+  const backup = {
+    exportedAt: new Date().toISOString(),
+    settings: getSettings(),
+    profiles,
+    progressByProfile,
+    customCards,
+  };
+
+  const blob = new Blob([JSON.stringify(backup)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "little-learners-backup.json";
+  a.click();
+  URL.revokeObjectURL(url);
+  status.textContent = "Backup downloaded!";
+}
+
+async function importBackup(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const status = document.getElementById("backupStatus");
+  status.textContent = "Importing…";
+  try {
+    const text = await file.text();
+    const backup = JSON.parse(text);
+
+    if (backup.settings) saveSettings(backup.settings);
+    if (backup.profiles) saveProfiles(backup.profiles);
+    if (backup.progressByProfile) {
+      Object.entries(backup.progressByProfile).forEach(([pid, progress]) => {
+        localStorage.setItem(LS_PROGRESS_PREFIX + pid, JSON.stringify(progress));
+      });
+    }
+    if (backup.customCards) {
+      for (const c of backup.customCards) {
+        const card = { ...c };
+        if (c.audioBase64) card.audioBlob = await base64ToBlob(c.audioBase64);
+        delete card.audioBase64;
+        await putCustomCard(card);
+      }
+    }
+    status.textContent = "Backup restored! Reloading…";
+    setTimeout(() => location.reload(), 1200);
+  } catch (err) {
+    status.textContent = "That backup file couldn't be read.";
+  }
 }

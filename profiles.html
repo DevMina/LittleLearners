@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Little Learners – Who's Playing?</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#5FC9F3">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="page">
+  <div class="title-wrap">
+    <h1>Who's playing?</h1>
+    <p>Pick a name or add a new learner</p>
+  </div>
+
+  <div class="profile-grid" id="profileGrid"></div>
+
+  <button class="icon-btn" id="manageBtn" style="margin-top:22px;">✏️ Manage profiles</button>
+</div>
+
+<!-- New / edit profile modal -->
+<div class="win-banner" id="profileModal" style="display:none;">
+  <div class="win-card add-card-form">
+    <h2 id="modalTitle">New learner</h2>
+    <input type="text" id="nameInput" placeholder="Child's name" class="text-input" maxlength="20">
+    <div class="avatar-picker" id="avatarPicker"></div>
+    <div class="controls-row" style="margin-top:18px;">
+      <button class="icon-btn" id="modalCancelBtn">Cancel</button>
+      <button class="play-again-btn" id="modalSaveBtn">Save</button>
+    </div>
+    <button class="icon-btn danger-btn" id="modalDeleteBtn" style="display:none;margin-top:10px;">🗑️ Delete profile</button>
+  </div>
+</div>
+
+<script src="js/profiles.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/app.js"></script>
+<script src="js/profiles-ui.js"></script>
+</body>
+</html>

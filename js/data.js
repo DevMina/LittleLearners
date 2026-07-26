@@ -61,6 +61,87 @@ const DECKS = {
       letter: l,
     })),
   },
+  vehicles: {
+    title: "Vehicles",
+    color: "sky",
+    items: [
+      { id: "car", label: "Car", emoji: "🚗" },
+      { id: "bus", label: "Bus", emoji: "🚌" },
+      { id: "truck", label: "Truck", emoji: "🚚" },
+      { id: "train", label: "Train", emoji: "🚂" },
+      { id: "plane", label: "Airplane", emoji: "✈️" },
+      { id: "boat", label: "Boat", emoji: "⛵" },
+      { id: "bike", label: "Bike", emoji: "🚲" },
+      { id: "helicopter", label: "Helicopter", emoji: "🚁" },
+    ],
+  },
+  food: {
+    title: "Food",
+    color: "coral",
+    items: [
+      { id: "apple", label: "Apple", emoji: "🍎" },
+      { id: "banana", label: "Banana", emoji: "🍌" },
+      { id: "bread", label: "Bread", emoji: "🍞" },
+      { id: "milk", label: "Milk", emoji: "🥛" },
+      { id: "cheese", label: "Cheese", emoji: "🧀" },
+      { id: "egg", label: "Egg", emoji: "🥚" },
+      { id: "carrot", label: "Carrot", emoji: "🥕" },
+      { id: "cookie", label: "Cookie", emoji: "🍪" },
+    ],
+  },
+  bodyParts: {
+    title: "Body Parts",
+    color: "grape",
+    items: [
+      { id: "head", label: "Head", emoji: "🧑" },
+      { id: "eye", label: "Eye", emoji: "👁️" },
+      { id: "nose", label: "Nose", emoji: "👃" },
+      { id: "ear", label: "Ear", emoji: "👂" },
+      { id: "hand", label: "Hand", emoji: "✋" },
+      { id: "foot", label: "Foot", emoji: "🦶" },
+      { id: "mouth", label: "Mouth", emoji: "👄" },
+      { id: "tummy", label: "Tummy", emoji: "🫃" },
+    ],
+  },
+  emotions: {
+    title: "Feelings",
+    color: "sun",
+    items: [
+      { id: "happy", label: "Happy", emoji: "😄" },
+      { id: "sad", label: "Sad", emoji: "😢" },
+      { id: "angry", label: "Angry", emoji: "😠" },
+      { id: "scared", label: "Scared", emoji: "😨" },
+      { id: "sleepy", label: "Sleepy", emoji: "😴" },
+      { id: "surprised", label: "Surprised", emoji: "😲" },
+      { id: "silly", label: "Silly", emoji: "🤪" },
+      { id: "excited", label: "Excited", emoji: "🤩" },
+    ],
+  },
+  opposites: {
+    title: "Opposites",
+    color: "grass",
+    items: [
+      { id: "big", label: "Big", emoji: "🐘" },
+      { id: "small", label: "Small", emoji: "🐜" },
+      { id: "up", label: "Up", emoji: "⬆️" },
+      { id: "down", label: "Down", emoji: "⬇️" },
+      { id: "hot", label: "Hot", emoji: "🔥" },
+      { id: "cold", label: "Cold", emoji: "❄️" },
+      { id: "fast", label: "Fast", emoji: "🐆" },
+      { id: "slow", label: "Slow", emoji: "🐢" },
+      { id: "full", label: "Full", emoji: "🥤" },
+      { id: "empty", label: "Empty", emoji: "🫙" },
+    ],
+  },
+  sightWords: {
+    title: "First Words",
+    color: "orange",
+    items: ["I", "see", "a", "the", "like", "go", "big", "no", "yes", "up"].map((w) => ({
+      id: "sw_" + w,
+      label: w,
+      letter: w,
+    })),
+  },
 };
 
 // Render a visual for any card item into a container element
@@ -95,6 +176,7 @@ function renderCardVisual(item, el) {
   } else if (item.letter) {
     const s = document.createElement("div");
     s.className = "card-letter";
+    if (item.letter.length > 2) s.classList.add("card-letter-word");
     s.textContent = item.letter;
     el.appendChild(s);
   }

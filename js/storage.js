@@ -1,5 +1,5 @@
-// ---------- Progress & settings storage (localStorage) ----------
-const LS_PROGRESS = "ll_progress_v1";
+// ---------- Progress (per-profile) & settings (per-device) storage ----------
+const LS_PROGRESS_PREFIX = "ll_progress_v2:";
 const LS_SETTINGS = "ll_settings_v1";
 
 const DEFAULT_SETTINGS = {
@@ -9,7 +9,6 @@ const DEFAULT_SETTINGS = {
   sfx: true,
   sessionMinutes: 0,   // 0 = off
   enabledDecks: ["animals", "colors", "numbers", "shapes", "letters"],
-  parentPin: "",        // if set, gate requires hold + this isn't a real pin, just hold-to-unlock
 };
 
 function getSettings() {
@@ -27,17 +26,33 @@ function saveSettings(patch) {
   return next;
 }
 
+function _progressKey() {
+  const id = typeof getActiveProfileId === "function" ? getActiveProfileId() : null;
+  return LS_PROGRESS_PREFIX + (id || "default");
+}
+
 function getProgress() {
   try {
-    const raw = localStorage.getItem(LS_PROGRESS);
-    return raw ? JSON.parse(raw) : { decks: {}, games: {} };
+    const raw = localStorage.getItem(_progressKey());
+    return raw ? JSON.parse(raw) : { decks: {}, games: {}, activityDates: [] };
   } catch (e) {
-    return { decks: {}, games: {} };
+    return { decks: {}, games: {}, activityDates: [] };
   }
 }
 
 function saveProgress(p) {
-  localStorage.setItem(LS_PROGRESS, JSON.stringify(p));
+  localStorage.setItem(_progressKey(), JSON.stringify(p));
+}
+
+function _todayStr() {
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+
+function recordActivityToday(p) {
+  if (!p.activityDates) p.activityDates = [];
+  const today = _todayStr();
+  if (!p.activityDates.includes(today)) p.activityDates.push(today);
 }
 
 // Mark that a card was viewed in a deck; returns true if this completed the deck for the first time
@@ -51,6 +66,7 @@ function markCardSeen(deckKey, cardId, totalCount) {
     d.stars = 1;
     justCompleted = true;
   }
+  recordActivityToday(p);
   saveProgress(p);
   return justCompleted;
 }
@@ -67,6 +83,7 @@ function recordGameResult(gameKey, deckKey, won, quality) {
   if (!p.games[key]) p.games[key] = { plays: 0, bestStars: 0 };
   p.games[key].plays++;
   if (won) p.games[key].bestStars = Math.max(p.games[key].bestStars, quality);
+  recordActivityToday(p);
   saveProgress(p);
 }
 
@@ -76,6 +93,51 @@ function getGameStars(gameKey, deckKey) {
   return (p.games[key] && p.games[key].bestStars) || 0;
 }
 
+// Sum of every star earned across decks and games, used for mascot unlocks
+function getTotalStars() {
+  const p = getProgress();
+  let total = 0;
+  Object.values(p.decks || {}).forEach((d) => (total += d.stars || 0));
+  Object.values(p.games || {}).forEach((g) => (total += g.bestStars || 0));
+  return total;
+}
+
+// Consecutive-day streak, counting from today (or yesterday, if nothing logged yet today)
+function getStreak() {
+  const p = getProgress();
+  const dates = new Set(p.activityDates || []);
+  if (dates.size === 0) return 0;
+  let streak = 0;
+  let cursor = new Date();
+  // if nothing today, see if yesterday keeps the streak alive; otherwise it's broken
+  if (!dates.has(_dateStr(cursor))) {
+    cursor.setDate(cursor.getDate() - 1);
+    if (!dates.has(_dateStr(cursor))) return 0;
+  }
+  while (dates.has(_dateStr(cursor))) {
+    streak++;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return streak;
+}
+
+function _dateStr(d) {
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+
+// Practice days within the last 7 calendar days (for the weekly digest)
+function getWeekActivity() {
+  const p = getProgress();
+  const dates = new Set(p.activityDates || []);
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    days.push({ label: d.toLocaleDateString(undefined, { weekday: "short" }), active: dates.has(_dateStr(d)) });
+  }
+  return days;
+}
+
 function resetAllProgress() {
-  localStorage.removeItem(LS_PROGRESS);
+  localStorage.removeItem(_progressKey());
 }

@@ -19,6 +19,8 @@
     <h1>Find It!</h1>
   </div>
 
+  <div class="word-bank" id="deckPicker" style="max-width:640px;"></div>
+
   <div class="stat-row">
     <div class="stat-pill">⭐ Score: <span id="scoreCount">0</span></div>
     <div class="stat-pill">🎯 Round: <span id="roundCount">1</span>/8</div>
@@ -29,6 +31,7 @@
     <button class="diff-btn" data-n="2">2</button>
     <button class="diff-btn" data-n="4">4</button>
     <button class="diff-btn" data-n="6">6</button>
+    <span class="auto-hint">(adapts automatically)</span>
   </div>
 
   <div class="find-prompt" id="prompt">Find the...</div>
@@ -46,6 +49,7 @@
 </div>
 
 <script src="js/data.js"></script>
+<script src="js/profiles.js"></script>
 <script src="js/storage.js"></script>
 <script src="js/app.js"></script>
 <script src="js/game-find.js"></script>

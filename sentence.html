@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Little Learners – Sentence Builder</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#5FC9F3">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="page">
+  <div class="top-bar">
+    <button class="back-btn" onclick="location.href='index.html'">&larr; Home</button>
+    <button class="icon-btn" id="clearBtn">🧹 Clear</button>
+  </div>
+
+  <div class="title-wrap">
+    <h1>Sentence Builder</h1>
+    <p>Tap words to make a sentence!</p>
+  </div>
+
+  <div class="sentence-strip" id="sentenceStrip">
+    <span class="sentence-placeholder" id="placeholder">Tap words below…</span>
+  </div>
+
+  <button class="speak-btn" id="sayBtn" style="margin-bottom:24px;">🔊 Say my sentence</button>
+
+  <div class="section-label">Starter words</div>
+  <div class="word-bank" id="starterBank"></div>
+
+  <div class="section-label">Things</div>
+  <div class="word-bank" id="nounBank"></div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/profiles.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/app.js"></script>
+<script src="js/sentence.js"></script>
+</body>
+</html>
