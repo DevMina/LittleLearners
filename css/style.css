@@ -435,7 +435,28 @@ button { font-family: inherit; }
   .print-card { break-inside: avoid; }
 }
 
-/* ---------- Deck overview grid ---------- */
+/* ---------- Site footer ---------- */
+.site-footer {
+  width: 100%;
+  text-align: center;
+  padding: 28px 20px 20px;
+  color: var(--ink);
+  font-weight: 700;
+  font-size: .85rem;
+  opacity: .85;
+}
+.site-footer p { margin: 0 0 6px; }
+.site-footer a { color: var(--ink); text-decoration: underline; font-weight: 800; }
+.site-footer .footer-links { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+/* ---------- Contact form ---------- */
+.contact-panel { width: 100%; max-width: 480px; }
+.contact-panel textarea {
+  width: 100%; padding: 12px 16px; border-radius: 18px; border: 2px solid #E4ECF5;
+  font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 1rem; margin-bottom: 14px;
+  resize: vertical; min-height: 120px;
+}
+.contact-note { font-size: .85rem; color: var(--ink); opacity: .7; font-weight: 700; margin-bottom: 16px; }
 .overview-modal {
   position: fixed; inset: 0; background: rgba(31,58,95,0.55);
   z-index: 60; display: flex; align-items: center; justify-content: center; padding: 20px;

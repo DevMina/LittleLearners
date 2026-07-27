@@ -1,5 +1,5 @@
 // Bump this version string whenever assets change to invalidate old caches
-const CACHE_VERSION = "v4";
+const CACHE_VERSION = "v5";
 const CACHE_NAME = "little-learners-" + CACHE_VERSION;
 
 const APP_SHELL = [
@@ -15,6 +15,7 @@ const APP_SHELL = [
   "./digest.html",
   "./settings.html",
   "./print.html",
+  "./contact.html",
   "./manifest.json",
   "./css/style.css",
   "./js/data.js",
@@ -31,6 +32,7 @@ const APP_SHELL = [
   "./js/digest.js",
   "./js/settings.js",
   "./js/print.js",
+  "./js/contact.js",
   "./img/icon-192.png",
   "./img/icon-512.png",
 ];
@@ -53,7 +55,7 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   event.respondWith(
-    caches.match(event.request).then((cached) => {
+    caches.match(event.request, { cacheName: CACHE_NAME }).then((cached) => {
       if (cached) return cached;
       return fetch(event.request)
         .then((response) => {
@@ -63,7 +65,14 @@ self.addEventListener("fetch", (event) => {
           }
           return response;
         })
-        .catch(() => cached);
+        .catch(() => {
+          // Offline and not cached — for a page navigation, fall back to the cached shell
+          // rather than letting the browser show its generic offline error.
+          if (event.request.mode === "navigate") {
+            return caches.match("./index.html", { cacheName: CACHE_NAME });
+          }
+          return cached;
+        });
     })
   );
 });

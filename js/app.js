@@ -59,6 +59,39 @@ function playTone(kind) {
   });
 }
 
+// ---------- Service worker registration (runs on every page, not just index.html) ----------
+function initServiceWorker() {
+  if (!("serviceWorker" in navigator)) return;
+
+  window.addEventListener("load", async () => {
+    try {
+      const reg = await navigator.serviceWorker.register("service-worker.js");
+      // Ask immediately rather than waiting for the browser's own (sometimes hours-delayed)
+      // background check — this is what makes a freshly deployed version show up promptly.
+      reg.update().catch(() => {});
+    } catch (e) {
+      /* registration can fail offline, on file://, etc. — safe to ignore */
+    }
+  });
+
+  // skipWaiting()+clients.claim() hands control to the new worker immediately, but a tab
+  // that's already open is still running the OLD html/js/css it loaded into memory — taking
+  // control of future requests doesn't retroactively refresh what's already rendered. So:
+  // reload once, automatically, the moment a new worker actually takes over.
+  let reloadedForUpdate = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (reloadedForUpdate) return;
+    reloadedForUpdate = true;
+    window.location.reload();
+  });
+}
+initServiceWorker();
+
+document.addEventListener("DOMContentLoaded", () => {
+  const yearEl = document.getElementById("footerYear");
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
+});
+
 // ---------- Session timer ----------
 // Shows a friendly "time's up" overlay after the parent-configured number of minutes.
 function initSessionTimer() {

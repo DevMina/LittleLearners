@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Little Learners – Contact Us</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#5FC9F3">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="page">
+  <div class="top-bar">
+    <button class="back-btn" onclick="location.href='index.html'">&larr; Home</button>
+  </div>
+
+  <div class="title-wrap">
+    <h1>Contact Us</h1>
+    <p>Questions, feedback, or bug reports — we'd love to hear them</p>
+  </div>
+
+  <div class="settings-panel contact-panel">
+    <div class="settings-group">
+      <p class="contact-note">This is a static, offline-friendly app with no server behind it, so sending a message opens it in your email app instead of submitting silently — nothing is sent anywhere until you hit send there.</p>
+
+      <input type="text" id="nameInput" placeholder="Your name" class="text-input">
+      <input type="email" id="emailInput" placeholder="Your email (so we can reply)" class="text-input">
+      <textarea id="messageInput" placeholder="How can we help?"></textarea>
+
+      <button class="play-again-btn" id="sendBtn" style="width:100%;">✉️ Send message</button>
+      <div id="contactStatus" class="record-status"></div>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <p>© <span id="footerYear"></span> Little Learners. All rights reserved.</p>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="contact.html">Contact</a>
+  </div>
+</footer>
+
+<script src="js/app.js"></script>
+<script src="js/contact.js"></script>
+</body>
+</html>

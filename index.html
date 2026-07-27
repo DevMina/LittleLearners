@@ -155,9 +155,14 @@
     deferredPrompt = null;
     document.getElementById("installBtn").style.display = "none";
   });
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => navigator.serviceWorker.register("service-worker.js").catch(() => {}));
-  }
 </script>
+<footer class="site-footer">
+  <p>© <span id="footerYear"></span> Little Learners. All rights reserved.</p>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="contact.html">Contact</a>
+  </div>
+</footer>
+
 </body>
 </html>
