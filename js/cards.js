@@ -263,6 +263,17 @@ micBtn.addEventListener("click", () => {
     setTimeout(() => (micStatus.textContent = ""), 2800);
   });
 
+  // Some browsers end the session without ever firing "result" or "error" (e.g. it
+  // stopped listening too soon, or lost the network connection needed for recognition).
+  // Without this, the status text would be stuck on "Listening…" forever.
+  recognition.addEventListener("end", () => {
+    if (thisSession !== micSession || settled) return;
+    settled = true;
+    micActiveCleanup = null;
+    micStatus.textContent = "Didn't quite catch that — want to try again?";
+    setTimeout(() => (micStatus.textContent = ""), 2800);
+  });
+
   try {
     recognition.start();
   } catch (e) {

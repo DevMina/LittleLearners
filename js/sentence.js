@@ -1,6 +1,12 @@
 if (!requireProfile()) { /* redirecting to profile picker */ }
 
-const STARTERS = ["I", "see", "a", "the", "like", "no", "yes", "big"];
+const STARTERS = [
+  "I", "you", "we", "see", "like", "want", "have",
+  "a", "the", "my",
+  "big", "small", "no", "yes", "not",
+  "and", "is",
+  "go", "up", "down",
+];
 const NOUN_SOURCE_DECKS = ["animals", "food", "vehicles"];
 
 const strip = document.getElementById("sentenceStrip");

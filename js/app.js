@@ -92,6 +92,50 @@ document.addEventListener("DOMContentLoaded", () => {
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 });
 
+// ---------- "More below" scroll cue ----------
+// A subtle bottom fade + bouncing chevron that appears only when there's more
+// page content to scroll to, and disappears once the bottom is reached (or if
+// the page never had enough content to scroll in the first place). Runs on
+// every page since they all load app.js.
+function initScrollCue() {
+  const cue = document.createElement("div");
+  cue.className = "scroll-cue";
+  cue.setAttribute("aria-hidden", "true");
+  cue.innerHTML =
+    '<span class="scroll-cue-chevron">' +
+    '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+    '<path d="M5 9l7 7 7-7" stroke="#1F3A5F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>' +
+    "</svg></span>";
+  document.body.appendChild(cue);
+
+  const THRESHOLD = 16; // px of remaining scroll still counted as "at the bottom"
+  let ticking = false;
+
+  function measure() {
+    ticking = false;
+    const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+    const atBottom = window.scrollY >= scrollable - THRESHOLD;
+    const hasMore = scrollable > THRESHOLD && !atBottom;
+    cue.classList.toggle("visible", hasMore);
+  }
+
+  function requestMeasure() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(measure);
+  }
+
+  requestMeasure();
+  window.addEventListener("scroll", requestMeasure, { passive: true });
+  window.addEventListener("resize", requestMeasure);
+  window.addEventListener("load", requestMeasure);
+  // Many pages build their content (tiles, cards, lists) with JS after
+  // DOMContentLoaded, which changes page height without firing scroll/resize.
+  setTimeout(requestMeasure, 300);
+  new MutationObserver(requestMeasure).observe(document.body, { childList: true, subtree: true });
+}
+document.addEventListener("DOMContentLoaded", initScrollCue);
+
 // ---------- Session timer ----------
 // Shows a friendly "time's up" overlay after the parent-configured number of minutes.
 function initSessionTimer() {
