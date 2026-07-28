@@ -39,7 +39,15 @@ const APP_SHELL = [
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)).then(() => self.skipWaiting())
+    caches.open(CACHE_NAME)
+      .then((cache) =>
+        Promise.all(
+          APP_SHELL.map((url) =>
+            fetch(url, { cache: "no-store" }).then((response) => cache.put(url, response))
+          )
+        )
+      )
+      .then(() => self.skipWaiting())
   );
 });
 
@@ -61,7 +69,9 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   event.respondWith(
-    fetch(event.request)
+    // cache: "no-store" bypasses the browser's own HTTP cache too, not just our Cache Storage
+    // above — otherwise a stale HTTP-cached response can come back and look like "the network".
+    fetch(event.request, { cache: "no-store" })
       .then((response) => {
         if (response && response.status === 200 && response.type === "basic") {
           const clone = response.clone();
