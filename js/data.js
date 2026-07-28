@@ -22,7 +22,6 @@ const DECKS = {
     color: "grape",
     items: [
       { id: "red", label: "Red", swatch: "#FF6B6B" },
-      { id: "blue", label: "Blue", swatch: "#5FC9F3" },
       { id: "yellow", label: "Yellow", swatch: "#FFD93D" },
       { id: "green", label: "Green", swatch: "#6BCB77" },
       { id: "purple", label: "Purple", swatch: "#9B72CF" },

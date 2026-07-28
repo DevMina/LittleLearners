@@ -278,6 +278,16 @@ button { font-family: inherit; }
 .progress-dots span.active { background: var(--ink); transform: scale(1.3); }
 
 /* ---------- Games shared ---------- */
+.match-board-panel {
+  background: var(--paper);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: 0 10px 0 var(--shadow);
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  justify-content: center;
+}
 .game-board {
   display: grid;
   gap: 14px;
@@ -298,16 +308,14 @@ button { font-family: inherit; }
   transition: transform .15s var(--bounce);
 }
 .game-tile:active { transform: scale(.94); }
-.game-tile.matched { background: var(--grass); opacity: .55; cursor: default; }
+.game-tile.matched { background: var(--grass); cursor: default; }
 .game-tile.flipped { background: var(--sun); }
 .game-tile.hidden-face { color: transparent; background: var(--card-back); }
 
 /* Color-swatch cards (the Colors deck) show the real color as an inline background —
-   dimming that with the generic .matched opacity would distort the very color a child
-   is learning to recognize. Keep it at full strength and show the match with a ring +
-   checkmark badge instead. */
+   show the match with a ring + checkmark badge instead of the generic green fill, so the
+   actual color stays fully visible and recognizable. */
 .game-tile.matched.swatch-tile {
-  opacity: 1;
   box-shadow: 0 6px 0 var(--shadow), 0 0 0 4px var(--grass);
 }
 .swatch-match-badge {
