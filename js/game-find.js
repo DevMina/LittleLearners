@@ -11,14 +11,36 @@ const roundEl = document.getElementById("roundCount");
 const winBanner = document.getElementById("winBanner");
 const confettiHost = document.getElementById("confettiHost");
 const diffRow = document.getElementById("difficultyRow");
-const deckPicker = document.getElementById("deckPicker");
+const deckCurrentBtn = document.getElementById("deckCurrentBtn");
+const deckCurrentLabel = document.getElementById("deckCurrentLabel");
+const deckCurrentDot = document.getElementById("deckCurrentDot");
+const deckChangeBtn = document.getElementById("deckChangeBtn");
+const deckModalOverlay = document.getElementById("deckModalOverlay");
+const deckModalCloseBtn = document.getElementById("deckModalCloseBtn");
+const deckGrid = document.getElementById("deckGrid");
+
+deckCurrentLabel.textContent = srcDeck3.title;
+deckCurrentDot.style.background = "var(--" + srcDeck3.color + ")";
 
 Object.keys(DECKS).forEach((key) => {
-  const btn = document.createElement("button");
-  btn.className = "word-chip" + (key === deckKey3 ? " active-chip" : "");
-  btn.textContent = DECKS[key].title;
-  btn.addEventListener("click", () => (location.href = "game-find.html?deck=" + key));
-  deckPicker.appendChild(btn);
+  const tile = document.createElement("button");
+  tile.className = "deck-tile " + DECKS[key].color + (key === deckKey3 ? " active" : "");
+  tile.textContent = DECKS[key].title;
+  tile.addEventListener("click", () => (location.href = "game-find.html?deck=" + key));
+  deckGrid.appendChild(tile);
+});
+
+function openDeckModal() { deckModalOverlay.style.display = "flex"; }
+function closeDeckModal() { deckModalOverlay.style.display = "none"; }
+
+deckCurrentBtn.addEventListener("click", openDeckModal);
+deckChangeBtn.addEventListener("click", openDeckModal);
+deckModalCloseBtn.addEventListener("click", closeDeckModal);
+deckModalOverlay.addEventListener("click", (e) => {
+  if (e.target === deckModalOverlay) closeDeckModal();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeDeckModal();
 });
 
 let score = 0;

@@ -19,7 +19,24 @@
     <h1>Find It!</h1>
   </div>
 
-  <div class="word-bank" id="deckPicker" style="max-width:640px;"></div>
+  <div class="deck-picker-row">
+    <button class="deck-current" id="deckCurrentBtn" type="button" aria-haspopup="dialog">
+      <span class="deck-current-dot" id="deckCurrentDot"></span>
+      <span id="deckCurrentLabel">Animals</span>
+      <span class="deck-current-chevron">▾</span>
+    </button>
+    <button class="deck-change-btn" id="deckChangeBtn" type="button" aria-label="Change category">🔀</button>
+  </div>
+
+  <div class="deck-modal-overlay" id="deckModalOverlay" style="display:none;" role="dialog" aria-modal="true" aria-label="Choose a category">
+    <div class="deck-modal-card">
+      <div class="deck-modal-head">
+        <h2>Choose a category</h2>
+        <button class="deck-modal-close" id="deckModalCloseBtn" type="button" aria-label="Close">✕</button>
+      </div>
+      <div class="deck-grid" id="deckGrid"></div>
+    </div>
+  </div>
 
   <div class="stat-row">
     <div class="stat-pill">⭐ Score: <span id="scoreCount">0</span></div>
@@ -54,7 +71,7 @@
 <script src="js/app.js"></script>
 <script src="js/game-find.js"></script>
 <footer class="site-footer">
-  <p>© <span id="footerYear"></span> Little Learners. All rights reserved.</p>
+  <p>© <span id="footerYear"></span> Mina Abdo. All rights reserved.</p>
   <div class="footer-links">
     <a href="index.html">Home</a>
     <a href="contact.html">Contact</a>

@@ -63,7 +63,7 @@ const DECKS = {
   },
   vehicles: {
     title: "Vehicles",
-    color: "indigo",
+    color: "magenta",
     items: [
       { id: "car", label: "Car", emoji: "🚗" },
       { id: "bus", label: "Bus", emoji: "🚌" },

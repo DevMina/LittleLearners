@@ -2,7 +2,8 @@ if (!requireProfile()) { /* redirecting to profile picker */ }
 
 const canvas = document.getElementById("traceCanvas");
 const ctx = canvas.getContext("2d");
-const modeBtn = document.getElementById("modeBtn");
+const modeLettersBtn = document.getElementById("modeLettersBtn");
+const modeNumbersBtn = document.getElementById("modeNumbersBtn");
 const winBanner = document.getElementById("winBanner");
 const confettiHost = document.getElementById("confettiHost");
 
@@ -49,12 +50,14 @@ function buildMasks(ch) {
 function setMode(m) {
   mode = m;
   sequence = mode === "numbers" ? "123456789".split("") : "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-  modeBtn.textContent = mode === "numbers" ? "🔢 Numbers" : "🔤 Letters";
+  modeLettersBtn.classList.toggle("active", mode === "letters");
+  modeNumbersBtn.classList.toggle("active", mode === "numbers");
   idx = 0;
   drawGuide();
 }
 
-modeBtn.addEventListener("click", () => setMode(mode === "letters" ? "numbers" : "letters"));
+modeLettersBtn.addEventListener("click", () => setMode("letters"));
+modeNumbersBtn.addEventListener("click", () => setMode("numbers"));
 
 function drawGuide() {
   hasDrawnAnything = false;

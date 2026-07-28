@@ -111,22 +111,60 @@ flashcard.addEventListener("touchend", (e) => {
 });
 
 // ---------- "Your turn! Try it" mic practice ----------
-// Not speech recognition — just detects that the child made some sound and celebrates the attempt.
+// Uses the Web Speech API to check whether the spoken word actually matches the
+// card's label (falls back to simple sound-detection if the browser doesn't support it).
 const micBtn = document.getElementById("micBtn");
 const micStatus = document.getElementById("micStatus");
 let micSession = 0; // increments each time listening starts, so a stale session can detect it's been superseded
 let micActiveCleanup = null;
 
-micBtn.addEventListener("click", async () => {
-  // If a session is already running, stop it cleanly before starting a new one
-  if (micActiveCleanup) {
-    micActiveCleanup();
-    micActiveCleanup = null;
+const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+// Letters and numbers are hard for speech engines to transcribe literally (e.g. "B" often
+// comes back as "bee", "1" sometimes comes back as "one") — these maps let a spoken
+// homophone still count as correct.
+const LETTER_SOUNDS = {
+  a: ["a", "ay"], b: ["bee", "be"], c: ["see", "sea", "cee"], d: ["dee"], e: ["e", "ee"],
+  f: ["ef", "eff"], g: ["gee"], h: ["aitch", "haitch"], i: ["i", "eye"], j: ["jay"],
+  k: ["kay"], l: ["el", "ell"], m: ["em"], n: ["en"], o: ["o", "oh"], p: ["pee"],
+  q: ["cue", "queue"], r: ["are", "ar"], s: ["es", "ess"], t: ["tee"], u: ["you", "u"],
+  v: ["vee"], w: ["double u", "doubleu", "dubya"], x: ["ex"], y: ["why"], z: ["zee", "zed"],
+};
+const NUMBER_WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
+
+function normalizeSpeech(s) {
+  return s.toLowerCase().replace(/[^a-z0-9 ]/g, "").replace(/\s+/g, " ").trim();
+}
+
+// Returns every normalized form that should count as a correct answer for this card.
+function acceptedAnswersFor(item) {
+  const label = normalizeSpeech(item.label);
+  const forms = new Set([label]);
+  if (/^[a-z]$/.test(label) && LETTER_SOUNDS[label]) {
+    LETTER_SOUNDS[label].forEach((s) => forms.add(s));
   }
-  const thisSession = ++micSession;
-  micStatus.textContent = "Listening… say it out loud!";
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  const n = parseInt(label, 10);
+  if (!isNaN(n) && n >= 0 && n < NUMBER_WORDS.length && String(n) === label) {
+    forms.add(NUMBER_WORDS[n]);
+  }
+  return [...forms];
+}
+
+function speechMatches(transcripts, item) {
+  const accepted = acceptedAnswersFor(item);
+  return transcripts.some((raw) => {
+    const t = normalizeSpeech(raw);
+    if (!t) return false;
+    const words = t.split(" ");
+    return accepted.some((form) => t === form || words.includes(form));
+  });
+}
+
+function startVolumeFallback(thisSession) {
+  // Used only when the browser has no speech recognition support at all — we can still
+  // tell the child made an attempt, but we're honest that we can't check the word itself.
+  navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+    if (thisSession !== micSession) { stream.getTracks().forEach((t) => t.stop()); return; }
     const AC = window.AudioContext || window.webkitAudioContext;
     const ctx = new AC();
     const source = ctx.createMediaStreamSource(stream);
@@ -147,7 +185,7 @@ micBtn.addEventListener("click", async () => {
     const start = Date.now();
     let heardSound = false;
     const check = () => {
-      if (stopped || thisSession !== micSession) return; // a newer session took over, or was cancelled
+      if (stopped || thisSession !== micSession) return;
       analyser.getByteTimeDomainData(data);
       const maxDeviation = Math.max(...data.map((v) => Math.abs(v - 128)));
       if (maxDeviation > 25) heardSound = true;
@@ -157,17 +195,78 @@ micBtn.addEventListener("click", async () => {
         cleanup();
         if (micActiveCleanup === cleanup) micActiveCleanup = null;
         if (heardSound) {
-          micStatus.textContent = "Great try! 🎉";
+          micStatus.textContent = "We heard you try! 🎉 (this browser can't check the word)";
           playTone("win");
         } else {
           micStatus.textContent = "Didn't hear you — want to try again?";
         }
-        setTimeout(() => (micStatus.textContent = ""), 2500);
+        setTimeout(() => (micStatus.textContent = ""), 2800);
       }
     };
     check();
-  } catch (e) {
+  }).catch(() => {
     micStatus.textContent = "Microphone access is needed for this.";
+  });
+}
+
+micBtn.addEventListener("click", () => {
+  if (micActiveCleanup) {
+    micActiveCleanup();
+    micActiveCleanup = null;
+  }
+  const thisSession = ++micSession;
+  const item = deck.items[order[idx]];
+
+  if (!SpeechRecognitionCtor) {
+    micStatus.textContent = "Listening… say it out loud!";
+    startVolumeFallback(thisSession);
+    return;
+  }
+
+  const recognition = new SpeechRecognitionCtor();
+  recognition.lang = "en-US";
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 3;
+
+  let settled = false;
+  micActiveCleanup = () => { settled = true; try { recognition.abort(); } catch (e) {} };
+
+  micStatus.textContent = "Listening… say it out loud!";
+
+  recognition.addEventListener("result", (e) => {
+    if (thisSession !== micSession) return;
+    settled = true;
+    micActiveCleanup = null;
+    const transcripts = [...e.results[0]].map((r) => r.transcript);
+    if (speechMatches(transcripts, item)) {
+      micStatus.textContent = "Great job! That's right! 🎉";
+      playTone("win");
+    } else {
+      micStatus.textContent = "Nice try! It's \"" + item.label + "\" — want to try again?";
+      playTone("tap");
+      speak(item.label);
+    }
+    setTimeout(() => (micStatus.textContent = ""), 3000);
+  });
+
+  recognition.addEventListener("error", (e) => {
+    if (thisSession !== micSession || settled) return;
+    settled = true;
+    micActiveCleanup = null;
+    if (e.error === "no-speech") {
+      micStatus.textContent = "Didn't hear you — want to try again?";
+    } else if (e.error === "not-allowed" || e.error === "service-not-allowed") {
+      micStatus.textContent = "Microphone access is needed for this.";
+    } else {
+      micStatus.textContent = "Couldn't hear that clearly — try again?";
+    }
+    setTimeout(() => (micStatus.textContent = ""), 2800);
+  });
+
+  try {
+    recognition.start();
+  } catch (e) {
+    micStatus.textContent = "Couldn't start the microphone — try again?";
   }
 });
 
