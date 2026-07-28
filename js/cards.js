@@ -209,6 +209,93 @@ function startVolumeFallback(thisSession) {
   });
 }
 
+// Installed PWAs (opened from a home-screen icon, not a browser tab) sometimes never get
+// a working microphone grant — the OS-level "app permission" and the in-page permission
+// prompt can get out of sync. When that happens, recognition.start() reports nothing wrong,
+// "listens" for a moment, then ends without ever producing a result — which used to look
+// identical to "we heard you but you said the wrong word". Checking permission state up
+// front lets us tell those two situations apart and give an honest, actionable message.
+function checkMicPermission() {
+  if (!navigator.permissions || !navigator.permissions.query) return Promise.resolve("unknown");
+  return navigator.permissions
+    .query({ name: "microphone" })
+    .then((status) => status.state)
+    .catch(() => "unknown");
+}
+
+function runSpeechRecognition(thisSession, item) {
+  const recognition = new SpeechRecognitionCtor();
+  recognition.lang = "en-US";
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 3;
+
+  let settled = false;
+  micActiveCleanup = () => { settled = true; try { recognition.abort(); } catch (e) {} };
+
+  micStatus.textContent = "Listening… say it out loud!";
+
+  function finish(text, opts) {
+    settled = true;
+    micActiveCleanup = null;
+    micStatus.textContent = text;
+    if (opts && opts.playTone) playTone(opts.playTone);
+    if (opts && opts.speakLabel) speak(item.label);
+    setTimeout(() => (micStatus.textContent = ""), opts && opts.holdMs ? opts.holdMs : 2800);
+  }
+
+  recognition.addEventListener("result", (e) => {
+    if (thisSession !== micSession) return;
+    const transcripts = [...e.results[0]].map((r) => r.transcript);
+    if (speechMatches(transcripts, item)) {
+      finish("Great job! That's right! 🎉", { playTone: "win", holdMs: 3000 });
+    } else {
+      finish("Nice try! It's \"" + item.label + "\" — want to try again?", { playTone: "tap", speakLabel: true, holdMs: 3000 });
+    }
+  });
+
+  // "nomatch" fires when the browser did capture and process speech but couldn't confidently
+  // transcribe it (as opposed to "no-speech", where it never heard anything at all). Some
+  // browsers still attach low-confidence alternatives to it, so we still check those before
+  // giving up.
+  recognition.addEventListener("nomatch", (e) => {
+    if (thisSession !== micSession || settled) return;
+    const transcripts = e.results && e.results[0] ? [...e.results[0]].map((r) => r.transcript) : [];
+    if (transcripts.length && speechMatches(transcripts, item)) {
+      finish("Great job! That's right! 🎉", { playTone: "win", holdMs: 3000 });
+    } else {
+      finish("Didn't quite catch that — want to try again?");
+    }
+  });
+
+  recognition.addEventListener("error", (e) => {
+    if (thisSession !== micSession || settled) return;
+    if (e.error === "no-speech") {
+      finish("Didn't hear you — want to try again?");
+    } else if (e.error === "not-allowed" || e.error === "service-not-allowed") {
+      finish("Microphone access is needed for this. Check your phone's app permissions for this app.");
+    } else {
+      finish("Couldn't hear that clearly — try again?");
+    }
+  });
+
+  // Some browsers end the session without ever firing "result", "nomatch", or "error" — most
+  // commonly seen when the app is installed as a home-screen PWA and the microphone grant
+  // never actually went through at the OS level. Without this, the status text would be stuck
+  // on "Listening…" forever, so we still need a fallback message here — but by this point
+  // we've already ruled out the permission case above, so this really does mean "didn't
+  // catch it" rather than "never had mic access".
+  recognition.addEventListener("end", () => {
+    if (thisSession !== micSession || settled) return;
+    finish("Didn't quite catch that — want to try again?");
+  });
+
+  try {
+    recognition.start();
+  } catch (e) {
+    finish("Couldn't start the microphone — try again?");
+  }
+}
+
 micBtn.addEventListener("click", () => {
   if (micActiveCleanup) {
     micActiveCleanup();
@@ -223,62 +310,16 @@ micBtn.addEventListener("click", () => {
     return;
   }
 
-  const recognition = new SpeechRecognitionCtor();
-  recognition.lang = "en-US";
-  recognition.interimResults = false;
-  recognition.maxAlternatives = 3;
-
-  let settled = false;
-  micActiveCleanup = () => { settled = true; try { recognition.abort(); } catch (e) {} };
-
   micStatus.textContent = "Listening… say it out loud!";
-
-  recognition.addEventListener("result", (e) => {
-    if (thisSession !== micSession) return;
-    settled = true;
-    micActiveCleanup = null;
-    const transcripts = [...e.results[0]].map((r) => r.transcript);
-    if (speechMatches(transcripts, item)) {
-      micStatus.textContent = "Great job! That's right! 🎉";
-      playTone("win");
-    } else {
-      micStatus.textContent = "Nice try! It's \"" + item.label + "\" — want to try again?";
-      playTone("tap");
-      speak(item.label);
+  checkMicPermission().then((state) => {
+    if (thisSession !== micSession) return; // superseded by a later click while we were checking
+    if (state === "denied") {
+      micStatus.textContent = "Microphone access is needed for this. Check your phone's app permissions for this app.";
+      setTimeout(() => (micStatus.textContent = ""), 3600);
+      return;
     }
-    setTimeout(() => (micStatus.textContent = ""), 3000);
+    runSpeechRecognition(thisSession, item);
   });
-
-  recognition.addEventListener("error", (e) => {
-    if (thisSession !== micSession || settled) return;
-    settled = true;
-    micActiveCleanup = null;
-    if (e.error === "no-speech") {
-      micStatus.textContent = "Didn't hear you — want to try again?";
-    } else if (e.error === "not-allowed" || e.error === "service-not-allowed") {
-      micStatus.textContent = "Microphone access is needed for this.";
-    } else {
-      micStatus.textContent = "Couldn't hear that clearly — try again?";
-    }
-    setTimeout(() => (micStatus.textContent = ""), 2800);
-  });
-
-  // Some browsers end the session without ever firing "result" or "error" (e.g. it
-  // stopped listening too soon, or lost the network connection needed for recognition).
-  // Without this, the status text would be stuck on "Listening…" forever.
-  recognition.addEventListener("end", () => {
-    if (thisSession !== micSession || settled) return;
-    settled = true;
-    micActiveCleanup = null;
-    micStatus.textContent = "Didn't quite catch that — want to try again?";
-    setTimeout(() => (micStatus.textContent = ""), 2800);
-  });
-
-  try {
-    recognition.start();
-  } catch (e) {
-    micStatus.textContent = "Couldn't start the microphone — try again?";
-  }
 });
 
 buildDots();
