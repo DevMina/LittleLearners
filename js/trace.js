@@ -36,7 +36,7 @@ function buildMasks(ch) {
   const core = octx.getImageData(0, 0, w, h);
 
   octx.clearRect(0, 0, w, h);
-  octx.lineWidth = 46; // dilation buffer beyond the letter's own strokes
+  octx.lineWidth = 20; // dilation buffer beyond the letter's own strokes (kept tight — the previous 46px buffer covered ~41% of the whole canvas, letting scribbles anywhere near the middle pass)
   octx.strokeStyle = "#000000";
   octx.fillStyle = "#000000";
   octx.strokeText(ch, w / 2, h / 2 + 10);
@@ -169,7 +169,7 @@ function celebrate() {
   }
 
   const { accuracy, coverage, redCells } = scoreTracing();
-  const onTarget = redCells >= 12 && accuracy >= 0.55 && coverage >= 0.12;
+  const onTarget = redCells >= 12 && accuracy >= 0.6 && coverage >= 0.15;
 
   winBanner.style.display = "flex";
   const label = (mode === "numbers" ? "number " : "letter ") + sequence[idx];

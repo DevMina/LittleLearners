@@ -7,6 +7,12 @@
   --grass: #6BCB77;
   --grape: #8864B6;
   --orange: #FF9F45;
+  --teal: #268178;
+  --indigo: #596CD3;
+  --rose: #B0577C;
+  --tan: #9D6936;
+  --olive: #667D2B;
+  --peach: #E8965A;
   --ink: #1F3A5F;
   --paper: #FFFFFF;
   --shadow: rgba(31, 58, 95, 0.28);
@@ -16,6 +22,15 @@
 }
 
 * { box-sizing: border-box; }
+
+html { -webkit-tap-highlight-color: transparent; }
+
+button, .tile, .game-tile, .diff-btn, .nav-btn, .word-chip, .avatar-opt, .overview-tile {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
 
 button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible {
   outline: 3px solid #1F3A5F;
@@ -77,7 +92,7 @@ button { font-family: inherit; }
 }
 .back-btn:active, .icon-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--shadow); }
 
-.title-wrap { text-align: center; margin: 6px 0 28px; }
+.title-wrap { text-align: center; margin: 6px 0 20px; }
 .title-wrap h1 { font-size: clamp(2rem, 6vw, 3rem); color: var(--ink); }
 .title-wrap p { color: var(--ink); opacity: .8; font-weight: 700; margin-top: 6px; }
 
@@ -130,8 +145,13 @@ button { font-family: inherit; }
 .tile.grape { background: var(--grape); }
 .tile.grass { background: var(--grass); color: var(--ink); }
 .tile.sun { background: var(--sun); color: var(--ink); }
-.tile.sky { background: var(--sky); color: var(--ink); }
 .tile.orange { background: var(--orange); color: var(--ink); }
+.tile.teal { background: var(--teal); }
+.tile.indigo { background: var(--indigo); }
+.tile.rose { background: var(--rose); }
+.tile.tan { background: var(--tan); }
+.tile.olive { background: var(--olive); }
+.tile.peach { background: var(--peach); color: var(--ink); }
 
 .section-label {
   color: var(--ink);
@@ -151,10 +171,11 @@ button { font-family: inherit; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 22px;
+  gap: 16px;
 }
 .flashcard {
   width: 100%;
+  max-height: 36vh;
   aspect-ratio: 4 / 5;
   background: var(--paper);
   border-radius: var(--radius-lg);
@@ -172,14 +193,14 @@ button { font-family: inherit; }
   to { transform: scale(1) rotate(0); opacity: 1; }
 }
 .flashcard:active { transform: scale(.97); }
-.card-emoji { font-size: 7rem; line-height: 1; }
+.card-emoji { font-size: clamp(2.8rem, 15vh, 7rem); line-height: 1; }
 .card-swatch { width: 65%; height: 55%; border-radius: 28px; box-shadow: inset 0 -8px 0 rgba(0,0,0,0.08); }
-.card-dots { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; max-width: 220px; margin-bottom: 14px; }
-.card-dots span { width: 26px; height: 26px; border-radius: 50%; background: var(--grass); }
-.card-number { font-family: 'Baloo 2', sans-serif; font-size: 3.4rem; font-weight: 800; color: var(--ink); }
-.card-letter { font-family: 'Baloo 2', sans-serif; font-size: 7rem; font-weight: 800; color: var(--grape); }
+.card-dots { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; max-width: 200px; margin-bottom: 10px; }
+.card-dots span { width: clamp(14px, 3vh, 26px); height: clamp(14px, 3vh, 26px); border-radius: 50%; background: var(--grass); }
+.card-number { font-family: 'Baloo 2', sans-serif; font-size: clamp(2rem, 12vh, 3.4rem); font-weight: 800; color: var(--ink); }
+.card-letter { font-family: 'Baloo 2', sans-serif; font-size: clamp(2.8rem, 15vh, 7rem); font-weight: 800; color: var(--grape); }
 .card-letter-word { font-size: clamp(2.2rem, 12vw, 3.6rem); text-align: center; padding: 0 10px; }
-.card-label { font-family: 'Baloo 2', sans-serif; font-size: 1.8rem; margin-top: 18px; color: var(--ink); }
+.card-label { font-family: 'Baloo 2', sans-serif; font-size: 1.8rem; margin-top: 12px; color: var(--ink); }
 
 .card-shape { width: 55%; aspect-ratio: 1; background: var(--coral); }
 .shape-circle { border-radius: 50%; background: var(--coral); }
@@ -227,7 +248,7 @@ button { font-family: inherit; }
 .game-tile:active { transform: scale(.94); }
 .game-tile.matched { background: var(--grass); opacity: .55; cursor: default; }
 .game-tile.flipped { background: var(--sun); }
-.game-tile.hidden-face { color: transparent; background: var(--sky); }
+.game-tile.hidden-face { color: transparent; background: var(--teal); }
 
 .find-prompt {
   background: var(--paper);

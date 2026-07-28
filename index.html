@@ -111,19 +111,19 @@
     colors: { color: "grape", emoji: "🎨" },
     numbers: { color: "grass", emoji: "🔢" },
     shapes: { color: "sun", emoji: "⭐" },
-    letters: { color: "sky", emoji: "🔤" },
-    vehicles: { color: "sky", emoji: "🚗" },
-    food: { color: "coral", emoji: "🍎" },
-    bodyParts: { color: "grape", emoji: "✋" },
-    emotions: { color: "sun", emoji: "😄" },
-    opposites: { color: "grass", emoji: "⬆️" },
-    sightWords: { color: "orange", emoji: "💬" },
+    letters: { color: "teal", emoji: "🔤" },
+    vehicles: { color: "indigo", emoji: "🚗" },
+    food: { color: "orange", emoji: "🍎" },
+    bodyParts: { color: "rose", emoji: "✋" },
+    emotions: { color: "peach", emoji: "😄" },
+    opposites: { color: "olive", emoji: "⬆️" },
+    sightWords: { color: "tan", emoji: "💬" },
   };
   const enabled = getSettings().enabledDecks;
   const wrap = document.getElementById("deckTiles");
   enabled.forEach((key) => {
     if (!DECKS[key]) return;
-    const meta = tileMeta[key] || { color: "sky", emoji: "🃏" };
+    const meta = tileMeta[key] || { color: "tan", emoji: "🃏" };
     const stars = getDeckStars(key);
     const btn = document.createElement("button");
     btn.className = "tile " + meta.color;

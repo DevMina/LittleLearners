@@ -54,7 +54,7 @@ const DECKS = {
   },
   letters: {
     title: "Letters",
-    color: "sky",
+    color: "teal",
     items: "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((l) => ({
       id: "l" + l,
       label: l,
@@ -63,7 +63,7 @@ const DECKS = {
   },
   vehicles: {
     title: "Vehicles",
-    color: "sky",
+    color: "indigo",
     items: [
       { id: "car", label: "Car", emoji: "🚗" },
       { id: "bus", label: "Bus", emoji: "🚌" },
@@ -77,7 +77,7 @@ const DECKS = {
   },
   food: {
     title: "Food",
-    color: "coral",
+    color: "orange",
     items: [
       { id: "apple", label: "Apple", emoji: "🍎" },
       { id: "banana", label: "Banana", emoji: "🍌" },
@@ -91,7 +91,7 @@ const DECKS = {
   },
   bodyParts: {
     title: "Body Parts",
-    color: "grape",
+    color: "rose",
     items: [
       { id: "head", label: "Head", emoji: "🧑" },
       { id: "eye", label: "Eye", emoji: "👁️" },
@@ -105,7 +105,7 @@ const DECKS = {
   },
   emotions: {
     title: "Feelings",
-    color: "sun",
+    color: "peach",
     items: [
       { id: "happy", label: "Happy", emoji: "😄" },
       { id: "sad", label: "Sad", emoji: "😢" },
@@ -119,7 +119,7 @@ const DECKS = {
   },
   opposites: {
     title: "Opposites",
-    color: "grass",
+    color: "olive",
     items: [
       { id: "big", label: "Big", emoji: "🐘" },
       { id: "small", label: "Small", emoji: "🐜" },
@@ -135,7 +135,7 @@ const DECKS = {
   },
   sightWords: {
     title: "First Words",
-    color: "orange",
+    color: "tan",
     items: ["I", "see", "a", "the", "like", "go", "big", "no", "yes", "up"].map((w) => ({
       id: "sw_" + w,
       label: w,
