@@ -28,6 +28,7 @@ const DECKS = {
       { id: "orange", label: "Orange", swatch: "#FF9F45" },
       { id: "pink", label: "Pink", swatch: "#FF8FB1" },
       { id: "brown", label: "Brown", swatch: "#A9714B" },
+      { id: "black", label: "Black", swatch: "#3A3A3A" },
     ],
   },
   numbers: {
