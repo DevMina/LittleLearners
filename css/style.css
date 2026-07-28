@@ -13,6 +13,9 @@
   --tan: #9D6936;
   --olive: #667D2B;
   --peach: #E8965A;
+  /* Face-down memory card back. Deliberately its own variable (not --teal or --sky) so
+     nothing blue-ish ever gets reused here by accident. */
+  --card-back: #C1553D;
   --ink: #1F3A5F;
   --paper: #FFFFFF;
   --shadow: rgba(31, 58, 95, 0.28);
@@ -283,6 +286,7 @@ button { font-family: inherit; }
 }
 .match-grid { grid-template-columns: repeat(4, 1fr); }
 .game-tile {
+  position: relative;
   aspect-ratio: 1;
   border: none;
   border-radius: 18px;
@@ -296,7 +300,32 @@ button { font-family: inherit; }
 .game-tile:active { transform: scale(.94); }
 .game-tile.matched { background: var(--grass); opacity: .55; cursor: default; }
 .game-tile.flipped { background: var(--sun); }
-.game-tile.hidden-face { color: transparent; background: var(--teal); }
+.game-tile.hidden-face { color: transparent; background: var(--card-back); }
+
+/* Color-swatch cards (the Colors deck) show the real color as an inline background —
+   dimming that with the generic .matched opacity would distort the very color a child
+   is learning to recognize. Keep it at full strength and show the match with a ring +
+   checkmark badge instead. */
+.game-tile.matched.swatch-tile {
+  opacity: 1;
+  box-shadow: 0 6px 0 var(--shadow), 0 0 0 4px var(--grass);
+}
+.swatch-match-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--grass);
+  color: #fff;
+  font-size: .85rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 0 var(--shadow);
+}
 
 .find-prompt {
   background: var(--paper);

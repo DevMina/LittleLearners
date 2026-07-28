@@ -1,5 +1,5 @@
 // Bump this version string whenever assets change to invalidate old caches
-const CACHE_VERSION = "v13";
+const CACHE_VERSION = "v14";
 const CACHE_NAME = "little-learners-" + CACHE_VERSION;
 
 const APP_SHELL = [

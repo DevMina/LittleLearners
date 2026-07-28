@@ -80,16 +80,30 @@ function sameIdSet(picks, ids) {
   return a.every((v, i) => v === ids[i]);
 }
 
+// Shapes deck items only carry a shape name (e.g. "circle"), no emoji/swatch — map that
+// to a glyph so the memory game shows an actual shape instead of falling back to the word.
+const SHAPE_GLYPHS = { circle: "⚫", square: "◼️", triangle: "▲", star: "⭐", heart: "❤️", diamond: "🔶" };
+
 function render() {
   board.innerHTML = "";
   cards.forEach((c, i) => {
     const btn = document.createElement("button");
     const stateClass = c.matched ? " matched" : (flipped.includes(i) ? " flipped" : " hidden-face");
-    btn.className = "game-tile" + stateClass;
+    const isSwatch = !!c.item.swatch;
+    btn.className = "game-tile" + stateClass + (isSwatch && (c.matched || flipped.includes(i)) ? " swatch-tile" : "");
     btn.setAttribute("aria-label", c.matched || flipped.includes(i) ? c.item.label : "Hidden card");
     if (c.matched || flipped.includes(i)) {
       if (c.item.emoji) btn.textContent = c.item.emoji;
-      else if (c.item.swatch) { btn.style.background = c.item.swatch; }
+      else if (c.item.shape) btn.textContent = SHAPE_GLYPHS[c.item.shape] || "●";
+      else if (c.item.swatch) {
+        btn.style.background = c.item.swatch;
+        if (c.matched) {
+          const badge = document.createElement("span");
+          badge.className = "swatch-match-badge";
+          badge.textContent = "✓";
+          btn.appendChild(badge);
+        }
+      }
       else btn.textContent = c.item.label;
     } else {
       btn.textContent = "?";
