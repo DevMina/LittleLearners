@@ -4,7 +4,7 @@ const LS_ACTIVE_PROFILE = "ll_active_profile_v1";
 
 const AVATAR_OPTIONS = [
   { emoji: "🦊", color: "coral" },
-  { emoji: "🐼", color: "sky" },
+  { emoji: "🐼", color: "teal" },
   { emoji: "🐸", color: "grass" },
   { emoji: "🦄", color: "grape" },
   { emoji: "🐯", color: "orange" },
@@ -14,7 +14,16 @@ const AVATAR_OPTIONS = [
 function getProfiles() {
   try {
     const raw = localStorage.getItem(LS_PROFILES);
-    return raw ? JSON.parse(raw) : [];
+    if (!raw) return [];
+    const list = JSON.parse(raw);
+    // "sky" used to be an avatar color option, but no .tile.sky CSS rule ever existed for it —
+    // profile tiles saved with it rendered with no background at all. Heal those in place.
+    let changed = false;
+    list.forEach((p) => {
+      if (p.color === "sky") { p.color = "teal"; changed = true; }
+    });
+    if (changed) saveProfiles(list);
+    return list;
   } catch (e) {
     return [];
   }

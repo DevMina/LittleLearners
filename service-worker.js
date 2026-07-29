@@ -35,6 +35,7 @@ const APP_SHELL = [
   "./js/contact.js",
   "./img/icon-192.png",
   "./img/icon-512.png",
+  "./img/icon-512-maskable.png",
 ];
 
 self.addEventListener("install", (event) => {

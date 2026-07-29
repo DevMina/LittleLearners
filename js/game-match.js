@@ -95,6 +95,7 @@ function render() {
     if (c.matched || flipped.includes(i)) {
       if (c.item.emoji) btn.textContent = c.item.emoji;
       else if (c.item.shape) btn.textContent = SHAPE_GLYPHS[c.item.shape] || "●";
+      else if (c.item.dots) renderMiniDots(btn, c.item);
       else if (c.item.swatch) {
         btn.style.background = c.item.swatch;
         if (c.matched) {

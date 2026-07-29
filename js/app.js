@@ -137,22 +137,35 @@ function initScrollCue() {
 document.addEventListener("DOMContentLoaded", initScrollCue);
 
 // ---------- Session timer ----------
-// Shows a friendly "time's up" overlay after the parent-configured number of minutes.
+// Shows a friendly "time's up" overlay after the parent-configured number of minutes,
+// with the option to snooze for 5 more minutes instead of only stopping outright.
 function initSessionTimer() {
   const s = getSettings();
   if (!s.sessionMinutes || s.sessionMinutes <= 0) return;
-  setTimeout(() => {
+
+  function scheduleTimeUp(ms) {
+    setTimeout(showTimeUpOverlay, ms);
+  }
+
+  function showTimeUpOverlay() {
     const overlay = document.createElement("div");
     overlay.className = "win-banner";
     overlay.innerHTML = `
       <div class="win-card">
         <h2>⏰ Time's up!</h2>
         <p>Great playing! Time to take a break.</p>
-        <button class="play-again-btn" onclick="location.href='index.html'">Back to home</button>
+        <button class="play-again-btn" id="sessionSnoozeBtn">+5 more minutes</button>
+        <button class="icon-btn" style="margin-top:10px;" onclick="location.href='index.html'">Back to home</button>
       </div>`;
     document.body.appendChild(overlay);
     speak("Time's up! Great playing.");
-  }, s.sessionMinutes * 60 * 1000);
+    document.getElementById("sessionSnoozeBtn").addEventListener("click", () => {
+      overlay.remove();
+      scheduleTimeUp(5 * 60 * 1000);
+    });
+  }
+
+  scheduleTimeUp(s.sessionMinutes * 60 * 1000);
 }
 
 // Bounce the mascot to celebrate or greet
@@ -165,7 +178,7 @@ function mascotBounce(el, mood) {
 
 // Lightweight confetti burst using DOM nodes (no external libraries)
 function confettiBurst(container) {
-  const colors = ["#FF6B6B", "#FFD93D", "#6BCB77", "#5FC9F3", "#9B72CF", "#FF9F45"];
+  const colors = ["#FF6B6B", "#FFD93D", "#6BCB77", "#FF8FB1", "#9B72CF", "#FF9F45"];
   for (let i = 0; i < 28; i++) {
     const p = document.createElement("span");
     p.className = "confetti-piece";
@@ -177,6 +190,23 @@ function confettiBurst(container) {
     container.appendChild(p);
     setTimeout(() => p.remove(), 1400);
   }
+}
+
+// Compact dot-counting view for the Numbers deck inside small game tiles (Memory Match /
+// Find It), mirroring the big flashcard's dots. Uses ink navy rather than green/yellow so it
+// stays visible against every tile background state (hidden/flipped/matched all differ).
+function renderMiniDots(container, item) {
+  const wrap = document.createElement("div");
+  wrap.className = "mini-dots-wrap";
+  const grid = document.createElement("div");
+  grid.className = "mini-dots";
+  for (let i = 0; i < item.dots; i++) grid.appendChild(document.createElement("span"));
+  const label = document.createElement("div");
+  label.className = "mini-dots-label";
+  label.textContent = item.label;
+  wrap.appendChild(grid);
+  wrap.appendChild(label);
+  container.appendChild(wrap);
 }
 
 // Fisher-Yates shuffle

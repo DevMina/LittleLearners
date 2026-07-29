@@ -151,7 +151,6 @@ button { font-family: inherit; }
 .mascot {
   width: 108px;
   height: 108px;
-  filter: drop-shadow(0 8px 0 var(--shadow));
 }
 @keyframes bounceUp {
   0% { transform: translateY(0) scaleY(1); }
@@ -318,6 +317,10 @@ button { font-family: inherit; }
 .game-tile.matched.swatch-tile {
   box-shadow: 0 6px 0 var(--shadow), 0 0 0 4px var(--grass);
 }
+.mini-dots-wrap { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.mini-dots { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; max-width: 70%; }
+.mini-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--ink); }
+.mini-dots-label { font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 0.9rem; color: var(--ink); }
 .swatch-match-badge {
   position: absolute;
   top: 6px;
@@ -682,7 +685,7 @@ button { font-family: inherit; }
   font-size: 1.6rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
 }
 .avatar-opt.coral { background: var(--coral); }
-.avatar-opt.sky { background: var(--sky); }
+.avatar-opt.teal { background: var(--teal); }
 .avatar-opt.grass { background: var(--grass); }
 .avatar-opt.grape { background: var(--grape); }
 .avatar-opt.orange { background: var(--orange); }

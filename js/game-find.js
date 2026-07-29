@@ -101,6 +101,10 @@ function newRound() {
   setTimeout(() => speak("Find the " + target.label), 250);
 }
 
+// Shapes deck items only carry a shape name (e.g. "circle"), no emoji/swatch — map that
+// to a glyph so this game shows an actual shape instead of falling back to the word.
+const SHAPE_GLYPHS = { circle: "⚫", square: "◼️", triangle: "▲", star: "⭐", heart: "❤️", diamond: "🔶" };
+
 function render() {
   board.innerHTML = "";
   options.forEach((item) => {
@@ -108,6 +112,8 @@ function render() {
     btn.className = "game-tile find-tile";
     btn.setAttribute("aria-label", item.label);
     if (item.emoji) btn.textContent = item.emoji;
+    else if (item.shape) btn.textContent = SHAPE_GLYPHS[item.shape] || "●";
+    else if (item.dots) renderMiniDots(btn, item);
     else if (item.swatch) btn.style.background = item.swatch;
     else btn.textContent = item.label;
     btn.addEventListener("click", () => choose(item, btn));
