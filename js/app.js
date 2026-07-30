@@ -10,7 +10,7 @@ function speak(text) {
     const u = new SpeechSynthesisUtterance(text);
     u.rate = s.rate || 0.85;
     u.pitch = 1.15;
-    u.volume = (s.volume ?? 1) * (s.nightMode ? 0.65 : 1);
+    u.volume = s.volume ?? 1;
     if (s.voiceName) {
       const v = window.speechSynthesis.getVoices().find((x) => x.name === s.voiceName);
       if (v) u.voice = v;
@@ -43,7 +43,6 @@ function playTone(kind) {
     win: [523.25, 659.25, 783.99, 1046.5], // C5 E5 G5 C6
     tap: [660],
   }[kind] || [440];
-  const muffle = s.nightMode ? 0.5 : 1; // softer, less startling tones for bedtime use
 
   notes.forEach((freq, i) => {
     const osc = ctx.createOscillator();
@@ -52,7 +51,7 @@ function playTone(kind) {
     osc.frequency.value = freq;
     const start = now + i * 0.11;
     gain.gain.setValueAtTime(0, start);
-    gain.gain.linearRampToValueAtTime(0.18 * (s.volume ?? 1) * muffle, start + 0.02);
+    gain.gain.linearRampToValueAtTime(0.18 * (s.volume ?? 1), start + 0.02);
     gain.gain.exponentialRampToValueAtTime(0.001, start + 0.28);
     osc.connect(gain).connect(ctx.destination);
     osc.start(start);
@@ -94,22 +93,6 @@ function pickTodaysSession() {
   ];
   const pick = rotation[dayIndex % rotation.length];
   return { url: pick.page + "?deck=" + deckKey, deckKey, gameLabel: pick.label };
-}
-
-// ---------- Night / bedtime mode ----------
-// Applies (or removes) the dimmed, low-stimulation palette on every page. Called on load
-// and again immediately whenever the parent flips the toggle, so it never needs a reload.
-function applyNightMode() {
-  const s = getSettings();
-  document.documentElement.classList.toggle("night-mode", !!s.nightMode);
-  const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute("content", s.nightMode ? "#16213A" : "#5FC9F3");
-}
-
-function toggleNightMode() {
-  const s = saveSettings({ nightMode: !getSettings().nightMode });
-  applyNightMode();
-  return s.nightMode;
 }
 
 // ---------- iOS "Add to Home Screen" hint ----------
@@ -184,7 +167,6 @@ function showUpdateToast() {
 document.addEventListener("DOMContentLoaded", () => {
   const yearEl = document.getElementById("footerYear");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
-  applyNightMode();
 });
 
 // ---------- "More below" scroll cue ----------

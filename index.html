@@ -15,7 +15,6 @@
   <div class="top-bar">
     <button class="icon-btn" onclick="location.href='settings.html'" aria-label="Parent settings">⚙️ Parents</button>
     <div class="top-bar-actions">
-      <button class="icon-btn" id="nightModeBtn" aria-label="Toggle night mode">🌙 Night mode</button>
       <button class="icon-btn" id="installBtn" style="display:none;" aria-label="Install app">⬇️ Install app</button>
     </div>
   </div>
@@ -187,17 +186,6 @@
     if (e.key === "Enter" || e.key === " ") { e.preventDefault(); this.click(); }
   });
   window.addEventListener("load", () => mascotBounce(document.getElementById("mascot")));
-
-  // Night mode toggle
-  const nightModeBtn = document.getElementById("nightModeBtn");
-  function syncNightModeBtn() {
-    nightModeBtn.innerHTML = getSettings().nightMode ? "☀️ Day mode" : "🌙 Night mode";
-  }
-  syncNightModeBtn();
-  nightModeBtn.addEventListener("click", () => {
-    toggleNightMode();
-    syncNightModeBtn();
-  });
 
   // iOS Safari can't fire beforeinstallprompt — show a manual instruction card instead
   initIOSInstallHint(document.getElementById("iosHintCard"));

@@ -828,18 +828,6 @@ button { font-family: inherit; }
   * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
 
-/* ---------- Night / bedtime mode ---------- */
-/* A global brightness/saturation dip plus a darker base sky reads as "dimmed and calm"
-   without having to redefine every single color token (and risk breaking contrast). */
-html.night-mode {
-  filter: brightness(0.7) saturate(0.55);
-  transition: filter .3s ease;
-}
-.night-mode {
-  --sky: #16213A;
-}
-html.night-mode .card-back { background: #6B3226; }
-
 /* ---------- iOS "Add to Home Screen" hint ---------- */
 .ios-hint-card {
   width: 100%;
