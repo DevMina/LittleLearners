@@ -482,17 +482,18 @@ button { font-family: inherit; }
 
 /* ---------- Difficulty selector (Find It!) ---------- */
 .difficulty-row {
-  display: flex; align-items: center; gap: 10px; margin-bottom: 18px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 18px;
   color: var(--ink); font-weight: 800;
 }
 .diff-btn {
-  border: none; width: 44px; height: 44px; border-radius: 50%;
+  border: none; width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
   background: var(--paper); color: var(--ink); font-weight: 800; font-size: .95rem; cursor: pointer;
   box-shadow: 0 4px 0 var(--shadow);
 }
 .diff-btn.active { background: var(--sun); }
 .diff-btn.diff-auto {
   width: auto; height: 44px; padding: 0 16px; border-radius: 999px; font-size: .85rem;
+  white-space: nowrap; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; gap: 4px;
 }
 .auto-hint { font-size: .78rem; font-weight: 700; opacity: .8; }
 .stage-label { width: 100%; text-align: center; font-weight: 800; color: var(--ink); opacity: .8; margin: -8px 0 16px; font-size: .9rem; }
