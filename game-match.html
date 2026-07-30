@@ -42,7 +42,18 @@
   <div class="stat-row">
     <div class="stat-pill">🕹️ Moves: <span id="movesCount">0</span></div>
     <div class="stat-pill">✅ Pairs: <span id="pairsCount">0</span>/<span id="pairsTotal">8</span></div>
+    <div class="stat-pill">🎮 Game: <span id="gameCount">1</span>/<span id="gameTotal">12</span></div>
   </div>
+
+  <div class="difficulty-row" id="difficultyRow">
+    <span>Pairs:</span>
+    <button class="diff-btn" data-n="3">3</button>
+    <button class="diff-btn" data-n="4">4</button>
+    <button class="diff-btn" data-n="6">6</button>
+    <button class="diff-btn" data-n="8">8</button>
+    <button class="diff-btn diff-auto">🔁 Auto</button>
+  </div>
+  <p class="stage-label" id="stageLabel"></p>
 
   <div class="match-board-panel">
     <div class="game-board match-grid" id="board"></div>

@@ -9,6 +9,7 @@ const DEFAULT_SETTINGS = {
   sfx: true,
   sessionMinutes: 0,   // 0 = off
   enabledDecks: ["animals", "colors", "numbers", "shapes", "letters"],
+  nightMode: false,    // dimmed, low-stimulation palette + muted sound for evening use
 };
 
 function getSettings() {

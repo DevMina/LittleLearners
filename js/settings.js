@@ -49,6 +49,7 @@ function initSettingsPage() {
   document.getElementById("volumeRange").value = s.volume;
   document.getElementById("sfxCheck").checked = s.sfx;
   document.getElementById("sessionSelect").value = String(s.sessionMinutes);
+  document.getElementById("nightModeCheck").checked = !!s.nightMode;
 
   populateVoices();
   if (window.speechSynthesis) {
@@ -60,6 +61,7 @@ function initSettingsPage() {
   document.getElementById("volumeRange").addEventListener("input", (e) => saveSettings({ volume: parseFloat(e.target.value) }));
   document.getElementById("sfxCheck").addEventListener("change", (e) => saveSettings({ sfx: e.target.checked }));
   document.getElementById("sessionSelect").addEventListener("change", (e) => saveSettings({ sessionMinutes: parseInt(e.target.value, 10) }));
+  document.getElementById("nightModeCheck").addEventListener("change", (e) => { saveSettings({ nightMode: e.target.checked }); applyNightMode(); });
   document.getElementById("testVoiceBtn").addEventListener("click", () => speak("Hi! This is how I sound."));
 
   // Deck toggles
@@ -103,48 +105,7 @@ function initSettingsPage() {
   document.getElementById("importFile").addEventListener("change", importBackup);
 }
 
-// ---------- Backup: export / import (settings + profiles + progress + custom cards) ----------
-const CUSTOM_DB_NAME = "little_learners_custom";
-const CUSTOM_STORE = "cards";
-
-function openCustomDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(CUSTOM_DB_NAME, 1);
-    req.onupgradeneeded = () => req.result.createObjectStore(CUSTOM_STORE, { keyPath: "id" });
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
-}
-async function getAllCustomCards() {
-  const db = await openCustomDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(CUSTOM_STORE, "readonly");
-    const req = tx.objectStore(CUSTOM_STORE).getAll();
-    req.onsuccess = () => resolve(req.result || []);
-    req.onerror = () => reject(req.error);
-  });
-}
-async function putCustomCard(card) {
-  const db = await openCustomDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(CUSTOM_STORE, "readwrite");
-    tx.objectStore(CUSTOM_STORE).put(card);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
-}
-
-function blobToBase64(blob) {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result);
-    reader.readAsDataURL(blob);
-  });
-}
-function base64ToBlob(dataUrl) {
-  return fetch(dataUrl).then((r) => r.blob());
-}
-
+// ---------- Backup: export / import (settings + profiles + progress) ----------
 async function exportBackup() {
   const status = document.getElementById("backupStatus");
   status.textContent = "Preparing backup…";
@@ -154,21 +115,12 @@ async function exportBackup() {
     const raw = localStorage.getItem(LS_PROGRESS_PREFIX + p.id);
     if (raw) progressByProfile[p.id] = JSON.parse(raw);
   });
-  const customCardsRaw = await getAllCustomCards();
-  const customCards = await Promise.all(
-    customCardsRaw.map(async (c) => ({
-      ...c,
-      audioBlob: undefined,
-      audioBase64: c.audioBlob ? await blobToBase64(c.audioBlob) : null,
-    }))
-  );
 
   const backup = {
     exportedAt: new Date().toISOString(),
     settings: getSettings(),
     profiles,
     progressByProfile,
-    customCards,
   };
 
   const blob = new Blob([JSON.stringify(backup)], { type: "application/json" });
@@ -196,14 +148,6 @@ async function importBackup(e) {
       Object.entries(backup.progressByProfile).forEach(([pid, progress]) => {
         localStorage.setItem(LS_PROGRESS_PREFIX + pid, JSON.stringify(progress));
       });
-    }
-    if (backup.customCards) {
-      for (const c of backup.customCards) {
-        const card = { ...c };
-        if (c.audioBase64) card.audioBlob = await base64ToBlob(c.audioBase64);
-        delete card.audioBase64;
-        await putCustomCard(card);
-      }
     }
     status.textContent = "Backup restored! Reloading…";
     setTimeout(() => location.reload(), 1200);

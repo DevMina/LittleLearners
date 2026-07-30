@@ -15,6 +15,7 @@
   <div class="top-bar">
     <button class="icon-btn" onclick="location.href='settings.html'" aria-label="Parent settings">⚙️ Parents</button>
     <div class="top-bar-actions">
+      <button class="icon-btn" id="nightModeBtn" aria-label="Toggle night mode">🌙 Night mode</button>
       <button class="icon-btn" id="installBtn" style="display:none;" aria-label="Install app">⬇️ Install app</button>
     </div>
   </div>
@@ -67,6 +68,14 @@
     <p>Tap, learn, and play!</p>
   </div>
 
+  <button class="today-session-btn" id="todaySessionBtn">
+    <span class="today-session-emoji">▶️</span>
+    <span class="today-session-text">
+      <strong>Start today's practice</strong>
+      <span id="todaySessionSub">A quick pick just for today</span>
+    </span>
+  </button>
+
   <div class="section-label">Flashcard decks</div>
   <div class="tile-grid" id="deckTiles"></div>
 
@@ -89,9 +98,6 @@
     </button>
     <button class="tile magenta" onclick="location.href='review.html'">
       <span class="tile-emoji">🧠</span>Review
-    </button>
-    <button class="tile peach" onclick="location.href='custom.html'">
-      <span class="tile-emoji">📷</span>My Cards
     </button>
     <button class="tile sun" onclick="location.href='digest.html'">
       <span class="tile-emoji">📊</span>My Progress
@@ -137,6 +143,13 @@
     if (totalStars >= 3) document.getElementById("accessoryBow").style.display = "block";
     if (totalStars >= 7) document.getElementById("accessoryHat").style.display = "block";
     if (totalStars >= 13) document.getElementById("accessoryGlasses").style.display = "block";
+
+    // "Today's session" — one-tap pick of a deck + game, favoring weak items or a fresh deck
+    const session = pickTodaysSession();
+    if (DECKS[session.deckKey]) {
+      document.getElementById("todaySessionSub").textContent = session.gameLabel + " · " + DECKS[session.deckKey].title;
+    }
+    document.getElementById("todaySessionBtn").addEventListener("click", () => (location.href = session.url));
   }
 
   // Build deck tiles from settings (parent-enabled decks only)
@@ -174,6 +187,17 @@
     if (e.key === "Enter" || e.key === " ") { e.preventDefault(); this.click(); }
   });
   window.addEventListener("load", () => mascotBounce(document.getElementById("mascot")));
+
+  // Night mode toggle
+  const nightModeBtn = document.getElementById("nightModeBtn");
+  function syncNightModeBtn() {
+    nightModeBtn.innerHTML = getSettings().nightMode ? "☀️ Day mode" : "🌙 Night mode";
+  }
+  syncNightModeBtn();
+  nightModeBtn.addEventListener("click", () => {
+    toggleNightMode();
+    syncNightModeBtn();
+  });
 
   // iOS Safari can't fire beforeinstallprompt — show a manual instruction card instead
   initIOSInstallHint(document.getElementById("iosHintCard"));

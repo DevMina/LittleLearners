@@ -53,33 +53,7 @@ function updateProfile(id, patch) {
 function deleteProfile(id) {
   saveProfiles(getProfiles().filter((p) => p.id !== id));
   localStorage.removeItem(LS_PROGRESS_PREFIX + id);
-  deleteCustomCardsForProfile(id).catch(() => {});
   if (getActiveProfileId() === id) setActiveProfileId(null);
-}
-
-// ---------- Clean up custom cards (photos/audio) tied to a deleted profile ----------
-function _openCustomDBForCleanup() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open("little_learners_custom", 1);
-    req.onupgradeneeded = () => req.result.createObjectStore("cards", { keyPath: "id" });
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
-}
-async function deleteCustomCardsForProfile(profileId) {
-  const db = await _openCustomDBForCleanup();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction("cards", "readwrite");
-    const store = tx.objectStore("cards");
-    const req = store.getAll();
-    req.onsuccess = () => {
-      (req.result || []).forEach((card) => {
-        if (card.profileId === profileId) store.delete(card.id);
-      });
-    };
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
 }
 
 function getActiveProfileId() {

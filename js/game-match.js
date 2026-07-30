@@ -2,12 +2,21 @@ if (!requireProfile()) { /* redirecting to profile picker */ }
 
 const deckKey2 = qparam("deck", "animals");
 const srcDeck = DECKS[deckKey2] || DECKS.animals;
-const PAIR_COUNT = Math.min(8, srcDeck.items.length);
+
+// Same tiered idea as Find It!: ramp up in fixed stages rather than one static grid size.
+// A "round" here is a full deal-until-all-matched game, so stages are shorter (3 games
+// each) than Find It's 10 rounds — a full memory match game takes a lot longer per round.
+const STAGES = [3, 4, 6, 8];
+const GAMES_PER_STAGE = 3;
 
 const board = document.getElementById("board");
 const movesEl = document.getElementById("movesCount");
 const pairsEl = document.getElementById("pairsCount");
 const pairsTotalEl = document.getElementById("pairsTotal");
+const gameCountEl = document.getElementById("gameCount");
+const gameTotalEl = document.getElementById("gameTotal");
+const stageLabel = document.getElementById("stageLabel");
+const diffRow = document.getElementById("difficultyRow");
 const winBanner = document.getElementById("winBanner");
 const confettiHost = document.getElementById("confettiHost");
 const deckCurrentBtn = document.getElementById("deckCurrentBtn");
@@ -17,8 +26,6 @@ const deckChangeBtn = document.getElementById("deckChangeBtn");
 const deckModalOverlay = document.getElementById("deckModalOverlay");
 const deckModalCloseBtn = document.getElementById("deckModalCloseBtn");
 const deckGrid = document.getElementById("deckGrid");
-
-pairsTotalEl.textContent = PAIR_COUNT;
 
 // Collapsed deck picker — shows the active category as a chip; tapping it or the
 // shuffle button opens a modal grid with every deck, still playable from here.
@@ -53,7 +60,61 @@ let moves = 0;
 let lock = false;
 let lastCardSetIds = null;
 
+// autoMode = true: run the full 4-stage ramp (3 → 4 → 6 → 8 pairs), 3 games each, 12 total.
+// autoMode = false: parent locked a single pair count — play 3 games at just that level.
+let autoMode = true;
+let stageIndex = 0;
+let PAIR_COUNT = Math.min(STAGES[0], srcDeck.items.length);
+let gameInStage = 1;
+let overallGame = 1;
+
+function totalGamesForRun() {
+  return autoMode ? STAGES.length * GAMES_PER_STAGE : GAMES_PER_STAGE;
+}
+
+function updateStageLabel() {
+  stageLabel.textContent = autoMode
+    ? "Level " + (stageIndex + 1) + " of " + STAGES.length + " — " + PAIR_COUNT + " pairs"
+    : PAIR_COUNT + " pairs";
+}
+
+function highlightDiffButtons() {
+  [...diffRow.querySelectorAll(".diff-btn[data-n]")].forEach((b) => {
+    b.classList.toggle("active", !autoMode && parseInt(b.dataset.n, 10) === PAIR_COUNT);
+  });
+  diffRow.querySelector(".diff-auto").classList.toggle("active", autoMode);
+}
+
+function startAutoMode() {
+  autoMode = true;
+  stageIndex = 0;
+  PAIR_COUNT = Math.min(STAGES[0], srcDeck.items.length);
+  resetRun();
+}
+
+function setDifficulty(n) {
+  autoMode = false;
+  PAIR_COUNT = Math.min(n, srcDeck.items.length);
+  resetRun();
+}
+
+function resetRun() {
+  gameInStage = 1;
+  overallGame = 1;
+  gameTotalEl.textContent = totalGamesForRun();
+  highlightDiffButtons();
+  updateStageLabel();
+  setup();
+}
+
+diffRow.querySelectorAll(".diff-btn[data-n]").forEach((b) => b.addEventListener("click", () => setDifficulty(parseInt(b.dataset.n, 10))));
+diffRow.querySelector(".diff-auto").addEventListener("click", startAutoMode);
+
 function setup() {
+  pairsTotalEl.textContent = PAIR_COUNT;
+  gameCountEl.textContent = overallGame;
+  board.className = "game-board match-grid pairs-" + PAIR_COUNT;
+
   let picks = shuffle(srcDeck.items).slice(0, PAIR_COUNT);
   // avoid dealing the exact same card set as last time, when the deck has more to draw from
   if (srcDeck.items.length > PAIR_COUNT) {
@@ -155,8 +216,32 @@ function win() {
   recordGameResult("match", deckKey2, true, quality);
 }
 
-document.getElementById("restartBtn").addEventListener("click", setup);
-document.getElementById("playAgainBtn").addEventListener("click", setup);
+// Moves to the next game, advancing to the next stage (more pairs) once the current stage's
+// games are done. Play again always continues the ramp rather than restarting the whole run.
+document.getElementById("restartBtn").addEventListener("click", () => { setup(); });
+document.getElementById("playAgainBtn").addEventListener("click", advance);
 
-setup();
+function advance() {
+  if (gameInStage >= GAMES_PER_STAGE) {
+    if (autoMode && stageIndex < STAGES.length - 1) {
+      stageIndex++;
+      PAIR_COUNT = Math.min(STAGES[stageIndex], srcDeck.items.length);
+      gameInStage = 1;
+      overallGame++;
+      highlightDiffButtons();
+      updateStageLabel();
+      setup();
+    } else {
+      // Run complete — start a fresh run at the same mode instead of leaving a dead end.
+      if (autoMode) startAutoMode();
+      else resetRun();
+    }
+  } else {
+    gameInStage++;
+    overallGame++;
+    setup();
+  }
+}
+
+resetRun();
 initSessionTimer();

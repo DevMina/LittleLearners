@@ -10,7 +10,7 @@ function speak(text) {
     const u = new SpeechSynthesisUtterance(text);
     u.rate = s.rate || 0.85;
     u.pitch = 1.15;
-    u.volume = s.volume ?? 1;
+    u.volume = (s.volume ?? 1) * (s.nightMode ? 0.65 : 1);
     if (s.voiceName) {
       const v = window.speechSynthesis.getVoices().find((x) => x.name === s.voiceName);
       if (v) u.voice = v;
@@ -43,6 +43,7 @@ function playTone(kind) {
     win: [523.25, 659.25, 783.99, 1046.5], // C5 E5 G5 C6
     tap: [660],
   }[kind] || [440];
+  const muffle = s.nightMode ? 0.5 : 1; // softer, less startling tones for bedtime use
 
   notes.forEach((freq, i) => {
     const osc = ctx.createOscillator();
@@ -51,12 +52,64 @@ function playTone(kind) {
     osc.frequency.value = freq;
     const start = now + i * 0.11;
     gain.gain.setValueAtTime(0, start);
-    gain.gain.linearRampToValueAtTime(0.18 * (s.volume ?? 1), start + 0.02);
+    gain.gain.linearRampToValueAtTime(0.18 * (s.volume ?? 1) * muffle, start + 0.02);
     gain.gain.exponentialRampToValueAtTime(0.001, start + 0.28);
     osc.connect(gain).connect(ctx.destination);
     osc.start(start);
     osc.stop(start + 0.3);
   });
+}
+
+// ---------- "Today's session" home-screen shortcut ----------
+// Picks one deck + one game so a parent can tap a single button instead of choosing every
+// time. Prefers a deck that has a weak item (ties this into the mastery/review system);
+// otherwise falls back to whichever enabled deck has been played least. The game type
+// rotates daily for variety, and is stable across taps on the same day.
+function pickTodaysSession() {
+  const settings = getSettings();
+  const enabledDecks = settings.enabledDecks && settings.enabledDecks.length ? settings.enabledDecks : Object.keys(DECKS);
+
+  let deckKey;
+  const weak = typeof getWeakItems === "function" ? getWeakItems(enabledDecks, 1) : [];
+  if (weak.length > 0) {
+    deckKey = weak[0].deckKey;
+  } else {
+    const progress = getProgress();
+    const totals = {};
+    enabledDecks.forEach((k) => (totals[k] = 0));
+    Object.entries(progress.games || {}).forEach(([key, g]) => {
+      const dk = key.split(":")[1];
+      if (dk in totals) totals[dk] += g.plays;
+    });
+    const minPlays = Math.min(...enabledDecks.map((k) => totals[k]));
+    const leastPlayed = enabledDecks.filter((k) => totals[k] === minPlays);
+    deckKey = leastPlayed[Math.floor(Math.random() * leastPlayed.length)];
+  }
+
+  const dayIndex = Math.floor(Date.now() / 86400000);
+  const rotation = [
+    { page: "cards.html", label: "Flashcards" },
+    { page: "game-find.html", label: "Find It!" },
+    { page: "game-match.html", label: "Memory Match" },
+  ];
+  const pick = rotation[dayIndex % rotation.length];
+  return { url: pick.page + "?deck=" + deckKey, deckKey, gameLabel: pick.label };
+}
+
+// ---------- Night / bedtime mode ----------
+// Applies (or removes) the dimmed, low-stimulation palette on every page. Called on load
+// and again immediately whenever the parent flips the toggle, so it never needs a reload.
+function applyNightMode() {
+  const s = getSettings();
+  document.documentElement.classList.toggle("night-mode", !!s.nightMode);
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute("content", s.nightMode ? "#16213A" : "#5FC9F3");
+}
+
+function toggleNightMode() {
+  const s = saveSettings({ nightMode: !getSettings().nightMode });
+  applyNightMode();
+  return s.nightMode;
 }
 
 // ---------- iOS "Add to Home Screen" hint ----------
@@ -101,20 +154,37 @@ function initServiceWorker() {
 
   // skipWaiting()+clients.claim() hands control to the new worker immediately, but a tab
   // that's already open is still running the OLD html/js/css it loaded into memory — taking
-  // control of future requests doesn't retroactively refresh what's already rendered. So:
-  // reload once, automatically, the moment a new worker actually takes over.
+  // control of future requests doesn't retroactively refresh what's already rendered. That
+  // used to trigger a silent, unannounced reload, which could yank a mid-game toddler off the
+  // screen with zero warning. Show a small toast instead, so a parent can refresh on their own
+  // terms — it still auto-refreshes after a short grace period so nobody gets stuck forever.
   let reloadedForUpdate = false;
   navigator.serviceWorker.addEventListener("controllerchange", () => {
     if (reloadedForUpdate) return;
     reloadedForUpdate = true;
-    window.location.reload();
+    showUpdateToast();
   });
 }
 initServiceWorker();
 
+function showUpdateToast() {
+  if (document.getElementById("updateToast")) return;
+  const toast = document.createElement("div");
+  toast.id = "updateToast";
+  toast.className = "update-toast";
+  toast.innerHTML = '<span>✨ New version ready!</span><button class="update-toast-btn" id="updateToastBtn">Refresh</button>';
+  document.body.appendChild(toast);
+  document.getElementById("updateToastBtn").addEventListener("click", () => window.location.reload());
+  // Grace period so an ignored toast doesn't leave the tab running stale code indefinitely
+  setTimeout(() => {
+    if (document.getElementById("updateToast")) window.location.reload();
+  }, 10000);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const yearEl = document.getElementById("footerYear");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
+  applyNightMode();
 });
 
 // ---------- "More below" scroll cue ----------
