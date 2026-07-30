@@ -2,12 +2,18 @@ if (!requireProfile()) { /* redirecting to profile picker */ }
 
 const deckKey3 = qparam("deck", "animals");
 const srcDeck3 = DECKS[deckKey3] || DECKS.animals;
-const TOTAL_ROUNDS = 8;
+
+// Fixed curriculum: 10 rounds at 2 cards, then auto-advance to 10 rounds at 4, then 8, then
+// 10 cards. Replaces the old performance-based auto-adjust with a simple, predictable ramp.
+const STAGES = [2, 4, 8, 10];
+const ROUNDS_PER_STAGE = 10;
 
 const board = document.getElementById("board");
 const prompt = document.getElementById("prompt");
 const scoreEl = document.getElementById("scoreCount");
 const roundEl = document.getElementById("roundCount");
+const roundTotalEl = document.getElementById("roundTotal");
+const stageLabel = document.getElementById("stageLabel");
 const winBanner = document.getElementById("winBanner");
 const confettiHost = document.getElementById("confettiHost");
 const diffRow = document.getElementById("difficultyRow");
@@ -44,44 +50,68 @@ document.addEventListener("keydown", (e) => {
 });
 
 let score = 0;
-let round = 1;
 let target = null;
 let options = [];
 let lock = false;
-let numOptions = parseInt(localStorage.getItem("ll_find_difficulty") || "4", 10);
 let missesThisRound = 0;
-let recentMisses = []; // rolling window of misses-per-round, used for auto difficulty
-let autoMode = true;
 let lastTargetId = null;
 
-function setDifficulty(n, fromAuto) {
+// autoMode = true: run the full 4-stage ramp (2 → 4 → 8 → 10), 10 rounds each, 40 total.
+// autoMode = false: parent locked a single card count — play 10 rounds at just that level.
+let autoMode = true;
+let stageIndex = 0;
+let numOptions = STAGES[0];
+let roundInStage = 1;
+let overallRound = 1;
+
+function totalRoundsForRun() {
+  return autoMode ? STAGES.length * ROUNDS_PER_STAGE : ROUNDS_PER_STAGE;
+}
+
+function updateStageLabel() {
+  stageLabel.textContent = autoMode
+    ? "Level " + (stageIndex + 1) + " of " + STAGES.length + " — " + numOptions + " cards"
+    : numOptions + " cards";
+}
+
+function refreshBoardClass() {
+  board.className = "game-board find-grid opts-" + numOptions;
+}
+
+function highlightDiffButtons() {
+  [...diffRow.querySelectorAll(".diff-btn[data-n]")].forEach((b) => {
+    b.classList.toggle("active", !autoMode && parseInt(b.dataset.n, 10) === numOptions);
+  });
+  diffRow.querySelector(".diff-auto").classList.toggle("active", autoMode);
+}
+
+function startAutoMode() {
+  autoMode = true;
+  stageIndex = 0;
+  numOptions = STAGES[0];
+  resetRun();
+}
+
+function setDifficulty(n) {
+  autoMode = false;
   numOptions = n;
-  localStorage.setItem("ll_find_difficulty", String(n));
-  if (!fromAuto) { autoMode = false; recentMisses = []; }
-  [...diffRow.querySelectorAll(".diff-btn")].forEach((b) => b.classList.toggle("active", parseInt(b.dataset.n, 10) === n));
-  board.className = "game-board find-grid opts-" + n;
-  round = 1;
+  resetRun();
+}
+
+function resetRun() {
+  roundInStage = 1;
+  overallRound = 1;
   score = 0;
   scoreEl.textContent = 0;
+  roundTotalEl.textContent = totalRoundsForRun();
+  refreshBoardClass();
+  highlightDiffButtons();
+  updateStageLabel();
   newRound();
 }
 
-function maybeAdjustDifficulty() {
-  if (!autoMode) return;
-  recentMisses.push(missesThisRound);
-  if (recentMisses.length > 3) recentMisses.shift();
-  if (recentMisses.length < 3) return;
-  const avg = recentMisses.reduce((a, b) => a + b, 0) / recentMisses.length;
-  if (avg <= 0.2 && numOptions < 6) {
-    recentMisses = [];
-    setDifficulty(numOptions + 2, true);
-  } else if (avg >= 1.5 && numOptions > 2) {
-    recentMisses = [];
-    setDifficulty(numOptions - 2, true);
-  }
-}
-
-diffRow.querySelectorAll(".diff-btn").forEach((b) => b.addEventListener("click", () => setDifficulty(parseInt(b.dataset.n, 10), false)));
+diffRow.querySelectorAll(".diff-btn[data-n]").forEach((b) => b.addEventListener("click", () => setDifficulty(parseInt(b.dataset.n, 10))));
+diffRow.querySelector(".diff-auto").addEventListener("click", startAutoMode);
 
 function newRound() {
   lock = false;
@@ -95,7 +125,7 @@ function newRound() {
     target = options[Math.floor(Math.random() * options.length)];
   }
   lastTargetId = target.id;
-  roundEl.textContent = round;
+  roundEl.textContent = overallRound;
   prompt.textContent = "Find the " + target.label;
   render();
   setTimeout(() => speak("Find the " + target.label), 250);
@@ -132,15 +162,7 @@ function choose(item, btn) {
     btn.style.background = "#6BCB77";
     // First correct tap this round (no misses yet) = solid recall of this item.
     recordItemResult(deckKey3, item.id, missesThisRound === 0);
-    setTimeout(() => {
-      maybeAdjustDifficulty();
-      if (round >= TOTAL_ROUNDS) {
-        finish();
-      } else {
-        round++;
-        newRound();
-      }
-    }, 700);
+    setTimeout(() => advance(), 700);
   } else {
     missesThisRound++;
     playTone("wrong");
@@ -150,24 +172,47 @@ function choose(item, btn) {
   }
 }
 
+// Moves to the next round, advancing to the next stage (more cards) once the current stage's
+// rounds are done — or finishing the whole run once every stage is complete.
+function advance() {
+  if (roundInStage >= ROUNDS_PER_STAGE) {
+    if (autoMode && stageIndex < STAGES.length - 1) {
+      stageIndex++;
+      numOptions = STAGES[stageIndex];
+      roundInStage = 1;
+      overallRound++;
+      refreshBoardClass();
+      highlightDiffButtons();
+      updateStageLabel();
+      newRound();
+    } else {
+      finish();
+    }
+  } else {
+    roundInStage++;
+    overallRound++;
+    newRound();
+  }
+}
+
 function finish() {
+  const total = totalRoundsForRun();
   winBanner.style.display = "flex";
-  document.getElementById("winStats").textContent = "You scored " + score + " out of " + TOTAL_ROUNDS + "!";
+  document.getElementById("winStats").textContent = "You scored " + score + " out of " + total + "!";
   playTone("win");
   confettiBurst(confettiHost);
-  speak("All done! You scored " + score + " out of " + TOTAL_ROUNDS);
-  const quality = score >= 7 ? 3 : score >= 5 ? 2 : 1;
+  speak("All done! You scored " + score + " out of " + total);
+  const fraction = score / total;
+  const quality = fraction >= 0.85 ? 3 : fraction >= 0.6 ? 2 : 1;
   recordGameResult("find", deckKey3, true, quality);
 }
 
 document.getElementById("repeatBtn").addEventListener("click", () => speak("Find the " + target.label));
 document.getElementById("playAgainBtn").addEventListener("click", () => {
-  score = 0;
-  round = 1;
-  scoreEl.textContent = 0;
   winBanner.style.display = "none";
-  newRound();
+  if (autoMode) startAutoMode();
+  else resetRun();
 });
 
-setDifficulty(numOptions, true);
+resetRun();
 initSessionTimer();

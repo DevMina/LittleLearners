@@ -188,3 +188,21 @@ function getWeakItems(deckKeys, limit) {
   results.sort((a, b) => a.accuracy - b.accuracy || a.lastSeen - b.lastSeen);
   return typeof limit === "number" ? results.slice(0, limit) : results;
 }
+
+// A deck "graduates" (earns a mastery badge) once every item in it has been recalled
+// reliably — at least 2 attempts and 85%+ accuracy — not just "seen" once like deck stars.
+function isDeckMastered(deckKey) {
+  const deck = typeof DECKS !== "undefined" && DECKS[deckKey];
+  if (!deck || !deck.items || deck.items.length === 0) return false;
+  const p = getProgress();
+  const stats = p.itemStats || {};
+  return deck.items.every((item) => {
+    const s = stats[deckKey + ":" + item.id];
+    return s && s.correct + s.wrong >= 2 && s.correct / (s.correct + s.wrong) >= 0.85;
+  });
+}
+
+function getMasteredDecks() {
+  if (typeof DECKS === "undefined") return [];
+  return Object.keys(DECKS).filter(isDeckMastered);
+}

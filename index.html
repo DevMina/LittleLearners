@@ -28,8 +28,12 @@
 
   <div class="home-topline">
     <button class="profile-chip" id="profileChip" aria-label="Switch learner"></button>
-    <div class="streak-chip" id="streakChip" style="display:none;"></div>
+    <div class="home-topline-chips">
+      <div class="streak-chip" id="streakChip" style="display:none;"></div>
+      <div class="streak-chip badge-chip-home" id="badgeChip" style="display:none;"></div>
+    </div>
   </div>
+  <p class="streak-nudge" id="streakNudge" style="display:none;"></p>
 
   <div class="title-wrap">
     <svg class="mascot" id="mascot" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" role="button" aria-label="Say hello" tabindex="0">
@@ -112,6 +116,19 @@
       const streakChip = document.getElementById("streakChip");
       streakChip.style.display = "inline-block";
       streakChip.textContent = "🔥 " + streak + " day streak";
+    } else {
+      // Gentle nudge instead of a chip when there's no streak going yet (or it's brand new)
+      const nudge = document.getElementById("streakNudge");
+      nudge.style.display = "block";
+      nudge.textContent = streak === 1 ? "🔥 Nice! Come back tomorrow to grow your streak." : "✨ Play today to start a streak!";
+    }
+
+    const masteredDecks = getMasteredDecks();
+    if (masteredDecks.length > 0) {
+      const badgeChip = document.getElementById("badgeChip");
+      badgeChip.style.display = "inline-block";
+      badgeChip.textContent = "🏆 " + masteredDecks.length + " badge" + (masteredDecks.length === 1 ? "" : "s");
+      badgeChip.title = masteredDecks.map((k) => DECKS[k].title).join(", ");
     }
 
     // Mascot unlocks based on total stars earned

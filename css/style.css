@@ -461,6 +461,14 @@ button { font-family: inherit; }
 .deck-toggle-list { display: flex; flex-direction: column; }
 .progress-summary { display: flex; flex-direction: column; margin-bottom: 14px; }
 .progress-row { display: flex; justify-content: space-between; padding: 8px 0; font-weight: 700; border-bottom: 1px solid #F0F3F8; }
+
+/* ---------- Mastery badges ---------- */
+.badge-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+.badge-chip {
+  display: flex; align-items: center; gap: 6px; background: var(--sun); color: var(--ink);
+  border-radius: 999px; padding: 8px 14px; font-weight: 800; font-size: .9rem;
+}
+.badge-emoji { font-size: 1.1rem; }
 .danger-btn { background: var(--coral); color: var(--paper); width: 100%; }
 .backup-note { font-size: .85rem; color: var(--ink); opacity: .7; font-weight: 700; margin-bottom: 12px; }
 .digest-panel { width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: 18px; }
@@ -479,14 +487,22 @@ button { font-family: inherit; }
 }
 .diff-btn {
   border: none; width: 44px; height: 44px; border-radius: 50%;
-  background: var(--paper); color: var(--ink); font-weight: 800; cursor: pointer;
+  background: var(--paper); color: var(--ink); font-weight: 800; font-size: .95rem; cursor: pointer;
   box-shadow: 0 4px 0 var(--shadow);
 }
 .diff-btn.active { background: var(--sun); }
+.diff-btn.diff-auto {
+  width: auto; height: 44px; padding: 0 16px; border-radius: 999px; font-size: .85rem;
+}
 .auto-hint { font-size: .78rem; font-weight: 700; opacity: .8; }
+.stage-label { width: 100%; text-align: center; font-weight: 800; color: var(--ink); opacity: .8; margin: -8px 0 16px; font-size: .9rem; }
 .opts-2 { grid-template-columns: repeat(2, 1fr); max-width: 300px; }
 .opts-4 { grid-template-columns: repeat(2, 1fr); max-width: 420px; }
 .opts-6 { grid-template-columns: repeat(3, 1fr); max-width: 480px; }
+.opts-8 { grid-template-columns: repeat(4, 1fr); max-width: 560px; }
+.opts-8 .find-tile { font-size: 2.6rem; }
+.opts-10 { grid-template-columns: repeat(5, 1fr); max-width: 640px; }
+.opts-10 .find-tile { font-size: 2.1rem; }
 
 /* ---------- Letters / Numbers mode toggle (Tracing) ---------- */
 .mode-toggle {
@@ -551,6 +567,8 @@ button { font-family: inherit; }
 }
 .word-chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--shadow); }
 .word-chip.active-chip { background: var(--sun); }
+.word-chip.weak-chip { background: var(--magenta); color: var(--paper); }
+.word-chip.weak-chip.active-chip { background: var(--sun); color: var(--ink); }
 
 /* ---------- Collapsed deck picker (category chip + modal grid) ---------- */
 .deck-picker-row {
@@ -625,6 +643,7 @@ button { font-family: inherit; }
 .print-swatch { width: 70px; height: 70px; border-radius: 12px; }
 .print-number, .print-letter { font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 2.6rem; }
 .print-label { font-family: 'Nunito', sans-serif; font-weight: 800; margin-top: 8px; font-size: .95rem; }
+.print-empty-note { font-family: 'Nunito', sans-serif; font-weight: 700; color: var(--ink); opacity: .8; }
 
 @media screen {
   .print-sheet { display: block; max-width: 700px; margin: 0 auto 40px; padding: 0 20px; }
@@ -729,11 +748,20 @@ button { font-family: inherit; }
   background: rgba(31,58,95,0.85); border-radius: 999px; padding: 8px 16px;
   color: var(--paper); font-weight: 800;
 }
+.home-topline-chips { display: flex; align-items: center; gap: 10px; }
+.streak-nudge {
+  width: 100%; max-width: 900px; text-align: center; font-weight: 700; font-size: .9rem;
+  color: var(--ink); opacity: .8; margin: -4px 0 8px;
+}
 .mascot-accessory { pointer-events: none; }
 
 @media (max-width: 420px) {
   .card-emoji { font-size: 5.5rem; }
   .deck-grid { grid-template-columns: repeat(3, 1fr); }
+  .opts-8 { grid-template-columns: repeat(3, 1fr); max-width: 340px; }
+  .opts-8 .find-tile { font-size: 2.2rem; }
+  .opts-10 { grid-template-columns: repeat(3, 1fr); max-width: 340px; }
+  .opts-10 .find-tile { font-size: 1.9rem; }
 }
 
 /* ---------- Tablet / landscape tuning ---------- */

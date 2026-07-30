@@ -16,6 +16,20 @@ const streak = getStreak();
 document.getElementById("streakLine").textContent =
   streak > 0 ? "🔥 " + streak + " day" + (streak === 1 ? "" : "s") + " in a row!" : "Play today to start a streak!";
 
+// Badges — a deck "graduates" once every item in it is reliably recalled, not just seen
+const badgesWrap = document.getElementById("badgesSummary");
+const masteredDecks = getMasteredDecks();
+if (masteredDecks.length === 0) {
+  badgesWrap.innerHTML = '<p class="backup-note">Keep practicing — a badge appears here once a whole deck is confidently mastered!</p>';
+} else {
+  masteredDecks.forEach((key) => {
+    const badge = document.createElement("div");
+    badge.className = "badge-chip";
+    badge.innerHTML = `<span class="badge-emoji">🏆</span>${DECKS[key].title}`;
+    badgesWrap.appendChild(badge);
+  });
+}
+
 // Decks
 const decksWrap = document.getElementById("decksSummary");
 const progress = getProgress();

@@ -40,16 +40,18 @@
 
   <div class="stat-row">
     <div class="stat-pill">⭐ Score: <span id="scoreCount">0</span></div>
-    <div class="stat-pill">🎯 Round: <span id="roundCount">1</span>/8</div>
+    <div class="stat-pill">🎯 Round: <span id="roundCount">1</span>/<span id="roundTotal">40</span></div>
   </div>
 
   <div class="difficulty-row" id="difficultyRow">
-    <span>Options:</span>
+    <span>Cards:</span>
     <button class="diff-btn" data-n="2">2</button>
     <button class="diff-btn" data-n="4">4</button>
-    <button class="diff-btn" data-n="6">6</button>
-    <span class="auto-hint">(adapts automatically)</span>
+    <button class="diff-btn" data-n="8">8</button>
+    <button class="diff-btn" data-n="10">10</button>
+    <button class="diff-btn diff-auto">🔁 All levels</button>
   </div>
+  <p class="stage-label" id="stageLabel"></p>
 
   <div class="find-prompt" id="prompt">Find the...</div>
 

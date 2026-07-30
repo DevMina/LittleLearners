@@ -2,6 +2,13 @@ const deckPicker = document.getElementById("deckPicker");
 const printSheet = document.getElementById("printSheet");
 const initialDeck = qparam("deck", "animals");
 
+const weakChip = document.createElement("button");
+weakChip.className = "word-chip weak-chip";
+weakChip.textContent = "🧠 Needs practice";
+weakChip.dataset.deck = "__weak__";
+weakChip.addEventListener("click", () => selectWeakSpots());
+deckPicker.appendChild(weakChip);
+
 Object.keys(DECKS).forEach((key) => {
   const btn = document.createElement("button");
   btn.className = "word-chip";
@@ -38,6 +45,28 @@ function selectDeck(key) {
     const card = document.createElement("div");
     card.className = "print-card";
     card.innerHTML = cardInnerHTML(item) + `<div class="print-label">${item.label}</div>`;
+    grid.appendChild(card);
+  });
+}
+
+// Practice sheet built from real per-item mastery data (the same list Review uses), not a
+// whole deck — lets a parent print exactly the words their child is currently struggling with.
+function selectWeakSpots() {
+  markActiveChip("__weak__");
+  const enabledDecks = typeof getSettings === "function" ? getSettings().enabledDecks : Object.keys(DECKS);
+  const weakItems = typeof getWeakItems === "function" ? getWeakItems(enabledDecks, 30) : [];
+  if (weakItems.length === 0) {
+    printSheet.innerHTML =
+      `<div class="print-heading">Little Learners — Needs a little practice</div>` +
+      `<p class="print-empty-note">No practice list yet — play Find It! or use the mic on some flashcards, then come back here.</p>`;
+    return;
+  }
+  printSheet.innerHTML = `<div class="print-heading">Little Learners — Needs a little practice</div><div class="print-grid"></div>`;
+  const grid = printSheet.querySelector(".print-grid");
+  weakItems.forEach((w) => {
+    const card = document.createElement("div");
+    card.className = "print-card";
+    card.innerHTML = cardInnerHTML(w.item) + `<div class="print-label">${w.item.label}</div>`;
     grid.appendChild(card);
   });
 }
