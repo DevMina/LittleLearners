@@ -130,6 +130,8 @@ function choose(item, btn) {
     playTone("correct");
     speak("Yes! " + item.label);
     btn.style.background = "#6BCB77";
+    // First correct tap this round (no misses yet) = solid recall of this item.
+    recordItemResult(deckKey3, item.id, missesThisRound === 0);
     setTimeout(() => {
       maybeAdjustDifficulty();
       if (round >= TOTAL_ROUNDS) {

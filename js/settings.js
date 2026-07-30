@@ -49,6 +49,7 @@ function initSettingsPage() {
   document.getElementById("volumeRange").value = s.volume;
   document.getElementById("sfxCheck").checked = s.sfx;
   document.getElementById("sessionSelect").value = String(s.sessionMinutes);
+  document.getElementById("nightModeCheck").checked = !!s.nightMode;
 
   populateVoices();
   if (window.speechSynthesis) {
@@ -60,6 +61,7 @@ function initSettingsPage() {
   document.getElementById("volumeRange").addEventListener("input", (e) => saveSettings({ volume: parseFloat(e.target.value) }));
   document.getElementById("sfxCheck").addEventListener("change", (e) => saveSettings({ sfx: e.target.checked }));
   document.getElementById("sessionSelect").addEventListener("change", (e) => saveSettings({ sessionMinutes: parseInt(e.target.value, 10) }));
+  document.getElementById("nightModeCheck").addEventListener("change", (e) => { saveSettings({ nightMode: e.target.checked }); applyNightMode(); });
   document.getElementById("testVoiceBtn").addEventListener("click", () => speak("Hi! This is how I sound."));
 
   // Deck toggles

@@ -9,6 +9,7 @@ const DEFAULT_SETTINGS = {
   sfx: true,
   sessionMinutes: 0,   // 0 = off
   enabledDecks: ["animals", "colors", "numbers", "shapes", "letters"],
+  nightMode: false,    // dimmed, low-stimulation palette + muted sound for evening use
 };
 
 function getSettings() {
@@ -140,4 +141,50 @@ function getWeekActivity() {
 
 function resetAllProgress() {
   localStorage.removeItem(_progressKey());
+}
+
+// ---------- Per-item mastery tracking (real spaced repetition, not just deck stars) ----------
+// Every time a game or the mic check can tell whether a *specific* item was recalled
+// correctly or not, it calls recordItemResult. This lets us resurface the exact items a
+// child struggles with (e.g. "frog") across every game, rather than just marking a whole
+// deck "seen".
+function recordItemResult(deckKey, itemId, correct) {
+  const p = getProgress();
+  if (!p.itemStats) p.itemStats = {};
+  const key = deckKey + ":" + itemId;
+  if (!p.itemStats[key]) p.itemStats[key] = { correct: 0, wrong: 0, lastSeen: 0 };
+  const s = p.itemStats[key];
+  if (correct) s.correct++;
+  else s.wrong++;
+  s.lastSeen = Date.now();
+  recordActivityToday(p);
+  saveProgress(p);
+}
+
+function getItemStats(deckKey, itemId) {
+  const p = getProgress();
+  const key = deckKey + ":" + itemId;
+  return (p.itemStats && p.itemStats[key]) || { correct: 0, wrong: 0, lastSeen: 0 };
+}
+
+// Returns the weakest items across the given decks, ranked by accuracy (worst first),
+// then by how long ago they were last seen. Only considers items with at least 2
+// recorded attempts, so a single unlucky miss doesn't brand something "weak" forever.
+function getWeakItems(deckKeys, limit) {
+  const p = getProgress();
+  const stats = p.itemStats || {};
+  const results = [];
+  (deckKeys || []).forEach((deckKey) => {
+    const deck = typeof DECKS !== "undefined" && DECKS[deckKey];
+    if (!deck) return;
+    deck.items.forEach((item) => {
+      const s = stats[deckKey + ":" + item.id];
+      if (!s || s.correct + s.wrong < 2) return;
+      const accuracy = s.correct / (s.correct + s.wrong);
+      if (accuracy >= 0.85) return; // already solid, don't clutter review with it
+      results.push({ deckKey, item, accuracy, attempts: s.correct + s.wrong, lastSeen: s.lastSeen });
+    });
+  });
+  results.sort((a, b) => a.accuracy - b.accuracy || a.lastSeen - b.lastSeen);
+  return typeof limit === "number" ? results.slice(0, limit) : results;
 }

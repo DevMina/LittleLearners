@@ -45,3 +45,18 @@ if (gameEntries.length === 0) {
     gamesWrap.appendChild(row);
   });
 }
+
+// Needs a little practice — real per-item mastery, not just deck completion
+const weakItems = getWeakItems(getSettings().enabledDecks, 6);
+if (weakItems.length > 0) {
+  document.getElementById("weakSpotsGroup").style.display = "block";
+  const weakWrap = document.getElementById("weakSpotsSummary");
+  weakWrap.innerHTML = "";
+  weakItems.forEach((w) => {
+    const deckName = (DECKS[w.deckKey] && DECKS[w.deckKey].title) || w.deckKey;
+    const row = document.createElement("div");
+    row.className = "progress-row";
+    row.innerHTML = `<span>${w.item.label} · ${deckName}</span><span>${Math.round(w.accuracy * 100)}% got it</span>`;
+    weakWrap.appendChild(row);
+  });
+}

@@ -247,8 +247,10 @@ function runSpeechRecognition(thisSession, item) {
     if (thisSession !== micSession) return;
     const transcripts = [...e.results[0]].map((r) => r.transcript);
     if (speechMatches(transcripts, item)) {
+      recordItemResult(deckKey, item.id, true);
       finish("Great job! That's right! 🎉", { playTone: "win", holdMs: 3000 });
     } else {
+      recordItemResult(deckKey, item.id, false);
       finish("Nice try! It's \"" + item.label + "\" — want to try again?", { playTone: "tap", speakLabel: true, holdMs: 3000 });
     }
   });

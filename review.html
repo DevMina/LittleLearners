@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Little Learners – Review</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#5FC9F3">
+<link rel="apple-touch-icon" href="img/icon-192.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="page">
+  <div class="top-bar">
+    <button class="back-btn" onclick="location.href='index.html'">&larr; Home</button>
+  </div>
+
+  <div class="title-wrap">
+    <h1>🧠 Review Time</h1>
+    <p>A quick look at trickier words</p>
+  </div>
+
+  <div class="card-stage" id="reviewStage" style="display:none;">
+    <div class="deck-badge" id="deckBadge"></div>
+    <div class="flashcard" id="flashcard"></div>
+    <div class="card-label" id="cardLabel"></div>
+
+    <div class="assess-row">
+      <button class="assess-btn assess-btn--again" id="stillTrickyBtn">😅 Still tricky</button>
+      <button class="assess-btn assess-btn--got-it" id="gotItBtn">🎉 Got it!</button>
+    </div>
+    <button class="speak-btn" id="speakBtn">🔊 Say it again</button>
+    <div class="progress-dots" id="progressDots"></div>
+  </div>
+
+  <div class="empty-state" id="emptyState" style="display:none;">
+    <div class="empty-state-emoji">🌟</div>
+    <p>No weak spots to review yet! Play a few rounds of <strong>Find It!</strong> or try the mic on some flashcards, and I'll start collecting words to practice here.</p>
+    <button class="icon-btn" onclick="location.href='index.html'">Back to home</button>
+  </div>
+
+  <div class="win-banner" id="doneBanner" style="display:none;">
+    <div class="win-card">
+      <h2>🎉 Nice review!</h2>
+      <p id="doneStats"></p>
+      <button class="play-again-btn" onclick="location.reload()">Review again</button>
+      <button class="icon-btn" style="margin-top:10px;" onclick="location.href='index.html'">Back to home</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/profiles.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/app.js"></script>
+<script src="js/review.js"></script>
+<footer class="site-footer">
+  <p>© <span id="footerYear"></span> Mina Abdo. All rights reserved.</p>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="contact.html">Contact Us</a>
+  </div>
+</footer>
+
+</body>
+</html>

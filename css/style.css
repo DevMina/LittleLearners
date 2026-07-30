@@ -374,6 +374,30 @@ button { font-family: inherit; }
   animation: cardIn .4s var(--bounce);
 }
 .win-card h2 { font-size: 1.8rem; margin-bottom: 8px; }
+
+/* ---------- Card view modal actions (2-per-row) ---------- */
+.view-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 18px;
+}
+.action-btn {
+  border: none;
+  border-radius: 16px;
+  padding: 14px 10px;
+  font-weight: 800;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 6px 0 rgba(0,0,0,0.15);
+  transition: transform .12s var(--bounce), box-shadow .12s var(--bounce);
+  color: var(--ink);
+}
+.action-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.15); }
+.action-btn--play   { background: var(--sun); }
+.action-btn--edit   { background: var(--sky); }
+.action-btn--delete { background: var(--coral); color: var(--paper); }
+.action-btn--close  { background: #E4E9F1; }
 .win-card p { margin: 0 0 20px; font-weight: 700; color: var(--ink); opacity: .8; }
 .play-again-btn {
   border: none; background: var(--grass); color: var(--ink); font-weight: 800;
@@ -730,3 +754,69 @@ button { font-family: inherit; }
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
+
+/* ---------- Night / bedtime mode ---------- */
+/* A global brightness/saturation dip plus a darker base sky reads as "dimmed and calm"
+   without having to redefine every single color token (and risk breaking contrast). */
+html.night-mode {
+  filter: brightness(0.7) saturate(0.55);
+  transition: filter .3s ease;
+}
+.night-mode {
+  --sky: #16213A;
+}
+html.night-mode .card-back { background: #6B3226; }
+
+/* ---------- iOS "Add to Home Screen" hint ---------- */
+.ios-hint-card {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--paper);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  box-shadow: 0 6px 0 var(--shadow);
+  margin-bottom: 16px;
+  font-weight: 700;
+  font-size: .9rem;
+  color: var(--ink);
+}
+.ios-hint-emoji { font-size: 1.6rem; flex-shrink: 0; }
+.ios-hint-text { flex: 1; }
+.ios-share-glyph { display: inline-block; }
+.ios-hint-close {
+  border: none; background: #F1EFE8; border-radius: 50%; width: 32px; height: 32px;
+  min-width: 32px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  font-size: .85rem; color: var(--ink); cursor: pointer;
+}
+
+/* ---------- Review (mastery-based practice) ---------- */
+.deck-badge {
+  background: rgba(31,58,95,0.85); color: var(--paper); border-radius: 999px;
+  padding: 6px 16px; font-weight: 800; font-size: .85rem;
+}
+.assess-row { display: flex; gap: 14px; width: 100%; max-width: 380px; }
+.assess-btn {
+  flex: 1; border: none; border-radius: 999px; padding: 16px 10px; font-weight: 800;
+  font-size: 1rem; cursor: pointer; box-shadow: 0 6px 0 rgba(0,0,0,0.15);
+  transition: transform .12s var(--bounce), box-shadow .12s var(--bounce);
+}
+.assess-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.15); }
+.assess-btn--again { background: #F1EFE8; color: var(--ink); }
+.assess-btn--got-it { background: var(--grass); color: var(--ink); }
+.empty-state {
+  width: 100%; max-width: 420px; display: flex; flex-direction: column; align-items: center;
+  gap: 14px; text-align: center; background: var(--paper); border-radius: var(--radius-lg);
+  padding: 32px 24px; box-shadow: 0 12px 0 var(--shadow);
+}
+.empty-state-emoji { font-size: 3rem; }
+.empty-state p { margin: 0; font-weight: 700; color: var(--ink); opacity: .85; }
+
+/* ---------- Story mode ---------- */
+.story-text {
+  font-family: 'Baloo 2', sans-serif; font-size: 1.5rem; text-align: center;
+  color: var(--ink); max-width: 340px; min-height: 2.4em;
+}
+.story-counter { font-weight: 800; color: var(--ink); opacity: .7; font-size: .9rem; }

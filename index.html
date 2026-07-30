@@ -14,7 +14,16 @@
 
   <div class="top-bar">
     <button class="icon-btn" onclick="location.href='settings.html'" aria-label="Parent settings">⚙️ Parents</button>
+    <button class="icon-btn" id="nightModeBtn" aria-label="Toggle night mode">🌙 Night mode</button>
     <button class="icon-btn" id="installBtn" style="display:none;" aria-label="Install app">⬇️ Install app</button>
+  </div>
+
+  <div class="ios-hint-card" id="iosHintCard" style="display:none;">
+    <span class="ios-hint-emoji">📲</span>
+    <div class="ios-hint-text">
+      <strong>Add to your Home Screen:</strong> tap the Share button <span class="ios-share-glyph">⬆️</span> below, then choose "Add to Home Screen".
+    </div>
+    <button class="ios-hint-close" data-ios-hint-dismiss aria-label="Dismiss">✕</button>
   </div>
 
   <div class="home-topline">
@@ -69,6 +78,12 @@
     </button>
     <button class="tile grass" onclick="location.href='sentence.html'">
       <span class="tile-emoji">💬</span>Sentence Builder
+    </button>
+    <button class="tile teal" onclick="location.href='story.html'">
+      <span class="tile-emoji">📖</span>Story Time
+    </button>
+    <button class="tile magenta" onclick="location.href='review.html'">
+      <span class="tile-emoji">🧠</span>Review
     </button>
     <button class="tile peach" onclick="location.href='custom.html'">
       <span class="tile-emoji">📷</span>My Cards
@@ -141,6 +156,20 @@
     if (e.key === "Enter" || e.key === " ") { e.preventDefault(); this.click(); }
   });
   window.addEventListener("load", () => mascotBounce(document.getElementById("mascot")));
+
+  // Night mode toggle
+  const nightModeBtn = document.getElementById("nightModeBtn");
+  function syncNightModeBtn() {
+    nightModeBtn.innerHTML = getSettings().nightMode ? "☀️ Day mode" : "🌙 Night mode";
+  }
+  syncNightModeBtn();
+  nightModeBtn.addEventListener("click", () => {
+    toggleNightMode();
+    syncNightModeBtn();
+  });
+
+  // iOS Safari can't fire beforeinstallprompt — show a manual instruction card instead
+  initIOSInstallHint(document.getElementById("iosHintCard"));
 
   // PWA install prompt
   let deferredPrompt = null;
