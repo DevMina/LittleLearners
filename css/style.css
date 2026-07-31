@@ -135,6 +135,15 @@ button { font-family: inherit; }
   justify-content: center;
   gap: 10px;
 }
+/* Cards page has 4 top-bar buttons (Home, See all, Print, Shuffle) — lay them out as a
+   clean 2x2 grid instead of letting them wrap into 3 uneven flex rows. */
+.top-bar--grid4 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.top-bar--grid4 .back-btn,
+.top-bar--grid4 .icon-btn { width: 100%; }
 
 .back-btn, .icon-btn {
   border: none;
@@ -366,7 +375,7 @@ button { font-family: inherit; }
   75% { transform: translateX(10px); }
 }
 
-.stat-row { display: flex; gap: 16px; margin-bottom: 18px; }
+.stat-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin-bottom: 18px; }
 .stat-pill {
   background: var(--paper); border-radius: 999px; padding: 8px 18px;
   font-weight: 800; box-shadow: 0 4px 0 var(--shadow); font-size: .95rem;
@@ -810,6 +819,9 @@ button { font-family: inherit; }
   .tile-grid { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 22px; }
   .card-stage { max-width: 480px; }
   .settings-panel { max-width: 640px; }
+  .top-bar--grid4 { display: flex; flex-wrap: wrap; justify-content: space-between; }
+  .top-bar--grid4 .back-btn,
+  .top-bar--grid4 .icon-btn { width: auto; }
 }
 
 /* ---------- Desktop / wide-viewport tuning ---------- */
