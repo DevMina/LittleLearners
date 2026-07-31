@@ -104,6 +104,19 @@ function pickTodaysSession() {
   if (sortPoolEnabled.length >= 2) {
     rotation.push({ page: "sort.html", label: "Sort It!", customSubtitle: "Sorting practice" });
   }
+  // Starts With draws from any picture deck, so it just needs one of its pool enabled.
+  const PHONICS_POOL = ["animals", "colors", "shapes", "vehicles", "food", "bodyParts", "emotions", "opposites"];
+  if (PHONICS_POOL.some((k) => enabledDecks.includes(k))) {
+    rotation.push({ page: "phonics.html", label: "Starts With", customSubtitle: "Letter sounds" });
+  }
+  // Odd One Out uses the same pool as Sort It! and needs the same 2-deck minimum.
+  if (sortPoolEnabled.length >= 2) {
+    rotation.push({ page: "odd.html", label: "Odd One Out", customSubtitle: "Which is different?" });
+  }
+  // Put In Order is Numbers-only, same gating as Count & Match.
+  if (enabledDecks.includes("numbers")) {
+    rotation.push({ page: "order.html", label: "Put In Order", fixedDeckKey: "numbers" });
+  }
   const pick = rotation[dayIndex % rotation.length];
   const finalDeckKey = pick.fixedDeckKey || deckKey;
   const url = pick.fixedDeckKey || pick.customSubtitle ? pick.page : pick.page + "?deck=" + finalDeckKey;

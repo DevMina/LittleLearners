@@ -390,6 +390,8 @@ button { font-family: inherit; }
   max-width: 480px;
 }
 .count-tile { aspect-ratio: 1; font-size: 2.6rem; border-radius: var(--radius-md); }
+.order-tile { font-family: 'Baloo 2', sans-serif; font-weight: 800; }
+.order-tile.wrong { animation: shake .4s; }
 .count-readout {
   font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 3rem;
   color: var(--ink); text-align: center; margin: -6px 0 18px;
@@ -548,6 +550,7 @@ button { font-family: inherit; }
 .auto-hint { font-size: .78rem; font-weight: 700; opacity: .8; }
 .stage-label { width: 100%; text-align: center; font-weight: 800; color: var(--ink); opacity: .8; margin: -8px 0 16px; font-size: .9rem; }
 .opts-2 { grid-template-columns: repeat(2, 1fr); max-width: 300px; }
+.opts-3 { grid-template-columns: repeat(3, 1fr); max-width: 480px; }
 .opts-4 { grid-template-columns: repeat(2, 1fr); max-width: 420px; }
 .opts-6 { grid-template-columns: repeat(3, 1fr); max-width: 480px; }
 .opts-8 { grid-template-columns: repeat(4, 1fr); max-width: 560px; }

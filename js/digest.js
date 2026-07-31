@@ -49,11 +49,13 @@ const gameEntries = Object.entries(progress.games || {});
 if (gameEntries.length === 0) {
   gamesWrap.innerHTML = '<div class="progress-row"><span>No games played yet</span></div>';
 } else {
-  const GAME_NAMES = { match: "Memory Match", find: "Find It!", count: "Count & Match", sort: "Sort It!" };
+  const GAME_NAMES = { match: "Memory Match", find: "Find It!", count: "Count & Match", sort: "Sort It!", phonics: "Starts With", odd: "Odd One Out", order: "Put In Order" };
   gameEntries.forEach(([key, g]) => {
     const [game, deck] = key.split(":");
     const gameName = GAME_NAMES[game] || game;
-    const deckName = deck.includes("-") && !DECKS[deck]
+    const deckName = deck === "mixed"
+      ? "mixed decks"
+      : deck.includes("-") && !DECKS[deck]
       ? deck.split("-").map((k) => (DECKS[k] ? DECKS[k].title : k)).join(" vs ")
       : (DECKS[deck] && DECKS[deck].title) || deck;
     const row = document.createElement("div");
