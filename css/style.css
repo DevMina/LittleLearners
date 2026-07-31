@@ -132,6 +132,7 @@ button { font-family: inherit; }
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 10px;
 }
 
@@ -489,7 +490,7 @@ button { font-family: inherit; }
 
 /* ---------- Difficulty selector (Find It!) ---------- */
 .difficulty-row {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 18px;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; margin-bottom: 18px;
   color: var(--ink); font-weight: 800;
 }
 .diff-btn {
