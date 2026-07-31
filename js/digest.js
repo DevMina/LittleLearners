@@ -49,10 +49,13 @@ const gameEntries = Object.entries(progress.games || {});
 if (gameEntries.length === 0) {
   gamesWrap.innerHTML = '<div class="progress-row"><span>No games played yet</span></div>';
 } else {
+  const GAME_NAMES = { match: "Memory Match", find: "Find It!", count: "Count & Match", sort: "Sort It!" };
   gameEntries.forEach(([key, g]) => {
     const [game, deck] = key.split(":");
-    const gameName = game === "match" ? "Memory Match" : "Find It!";
-    const deckName = (DECKS[deck] && DECKS[deck].title) || deck;
+    const gameName = GAME_NAMES[game] || game;
+    const deckName = deck.includes("-") && !DECKS[deck]
+      ? deck.split("-").map((k) => (DECKS[k] ? DECKS[k].title : k)).join(" vs ")
+      : (DECKS[deck] && DECKS[deck].title) || deck;
     const row = document.createElement("div");
     row.className = "progress-row";
     row.innerHTML = `<span>${gameName} · ${deckName}</span><span>${"⭐".repeat(g.bestStars)} (${g.plays} plays)</span>`;
@@ -74,3 +77,40 @@ if (weakItems.length > 0) {
     weakWrap.appendChild(row);
   });
 }
+
+// ---------- Share progress ----------
+// Builds a short plain-text summary from everything already computed above so a parent can
+// send it to the other parent, a grandparent, etc. via whatever share targets the OS offers
+// (Messages, WhatsApp, email...). Falls back to copying the text when Web Share isn't
+// available (e.g. on desktop browsers).
+function buildShareText() {
+  const name = profile ? profile.name : "My child";
+  const lines = [`${name}'s Little Learners progress:`];
+  lines.push(streak > 0 ? `🔥 ${streak} day${streak === 1 ? "" : "s"} in a row!` : "Just getting started this week.");
+  if (masteredDecks.length > 0) {
+    lines.push(`🏆 Mastered: ${masteredDecks.map((k) => DECKS[k].title).join(", ")}`);
+  }
+  const totalSeen = Object.values(progress.decks || {}).reduce((sum, d) => sum + (d.seen ? d.seen.length : 0), 0);
+  if (totalSeen > 0) lines.push(`📚 ${totalSeen} cards learned so far`);
+  if (gameEntries.length > 0) lines.push(`🎮 ${gameEntries.length} game${gameEntries.length === 1 ? "" : "s"} played`);
+  return lines.join("\n");
+}
+
+const shareStatus = document.getElementById("shareStatus");
+document.getElementById("shareBtn").addEventListener("click", async () => {
+  const text = buildShareText();
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: "Little Learners progress", text });
+    } catch (e) { /* user cancelled the share sheet — nothing to report */ }
+  } else if (navigator.clipboard) {
+    try {
+      await navigator.clipboard.writeText(text);
+      shareStatus.textContent = "Copied! Paste it into a message.";
+    } catch (e) {
+      shareStatus.textContent = "Couldn't copy — try again.";
+    }
+  } else {
+    shareStatus.textContent = "Sharing isn't available on this browser.";
+  }
+});

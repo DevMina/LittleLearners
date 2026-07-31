@@ -275,8 +275,10 @@ button { font-family: inherit; }
 .shape-star { background: var(--sun); clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
 .shape-heart { background: var(--coral); clip-path: path('M75 20 C 40 -10, -10 20, 20 60 L 75 120 L 130 60 C 160 20, 110 -10, 75 20 Z'); width: 150px; height: 130px; }
 .shape-diamond { background: var(--grape); clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
+.shape-pentagon { background: var(--orange); clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%); }
+.shape-hexagon { background: var(--teal); clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); }
 
-.controls-row { display: flex; align-items: center; gap: 18px; }
+.controls-row { display: flex; align-items: center; flex-wrap: wrap; justify-content: center; gap: 18px; }
 .nav-btn {
   width: 60px; height: 60px; border-radius: 50%; border: none;
   background: var(--paper); color: var(--ink); font-size: 1.6rem; font-weight: 800;
@@ -380,6 +382,37 @@ button { font-family: inherit; }
   background: var(--paper); border-radius: 999px; padding: 8px 18px;
   font-weight: 800; box-shadow: 0 4px 0 var(--shadow); font-size: .95rem;
 }
+
+/* ---------- Count & Match ---------- */
+.count-board {
+  grid-template-columns: repeat(auto-fit, minmax(64px, 84px));
+  justify-content: center;
+  max-width: 480px;
+}
+.count-tile { aspect-ratio: 1; font-size: 2.6rem; border-radius: var(--radius-md); }
+.count-readout {
+  font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 3rem;
+  color: var(--ink); text-align: center; margin: -6px 0 18px;
+}
+
+/* ---------- Sort It! ---------- */
+.sort-stage { display: flex; justify-content: center; margin: 6px 0 26px; }
+.sort-item {
+  width: 140px; height: 140px; background: var(--paper); border-radius: var(--radius-lg);
+  box-shadow: 0 8px 0 var(--shadow); display: flex; align-items: center; justify-content: center;
+  font-size: 4.4rem;
+}
+.sort-bins { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; max-width: 480px; margin: 0 auto; }
+.sort-bin {
+  flex: 1 1 180px; min-width: 150px; background: var(--paper); border: none; border-radius: var(--radius-lg);
+  padding: 20px 14px; text-align: center; box-shadow: 0 6px 0 var(--shadow); font-weight: 800; font-size: 1.05rem;
+  display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer;
+  color: var(--ink); transition: transform .12s var(--bounce);
+}
+.sort-bin:active { transform: scale(.96); }
+.sort-bin-emoji { font-size: 2.4rem; }
+.sort-bin.correct { background: var(--grass); }
+.sort-bin.wrong { animation: shake .4s; }
 
 .win-banner {
   position: fixed; inset: 0; background: rgba(31,58,95,0.55);

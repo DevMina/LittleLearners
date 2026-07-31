@@ -32,7 +32,7 @@ function cardInnerHTML(item) {
 }
 
 function shapeGlyph(shape) {
-  const map = { circle: "⚫", square: "◼️", triangle: "▲", star: "⭐", heart: "❤️", diamond: "🔶" };
+  const map = { circle: "⚫", square: "◼️", triangle: "▲", star: "⭐", heart: "❤️", diamond: "🔶", pentagon: "⬠", hexagon: "⬡" };
   return map[shape] || "●";
 }
 

@@ -133,7 +133,7 @@ function newRound() {
 
 // Shapes deck items only carry a shape name (e.g. "circle"), no emoji/swatch — map that
 // to a glyph so this game shows an actual shape instead of falling back to the word.
-const SHAPE_GLYPHS = { circle: "⚫", square: "◼️", triangle: "▲", star: "⭐", heart: "❤️", diamond: "🔶" };
+const SHAPE_GLYPHS = { circle: "⚫", square: "◼️", triangle: "▲", star: "⭐", heart: "❤️", diamond: "🔶", pentagon: "⬠", hexagon: "⬡" };
 
 function render() {
   board.innerHTML = "";

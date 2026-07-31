@@ -102,4 +102,5 @@ document.getElementById("newStoryBtn").addEventListener("click", () => {
 story = buildStory();
 render();
 play(); // passive "read to me" screen — starts automatically
+markActivityToday();
 initSessionTimer();

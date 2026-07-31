@@ -55,6 +55,15 @@ function recordActivityToday(p) {
   if (!p.activityDates.includes(today)) p.activityDates.push(today);
 }
 
+// Convenience wrapper for activities that don't otherwise touch progress (Sentence Builder,
+// Tracing, Listen & Learn) so a day spent only on those still counts toward the streak and
+// the weekly activity strip on the Progress page, same as decks and games already do.
+function markActivityToday() {
+  const p = getProgress();
+  recordActivityToday(p);
+  saveProgress(p);
+}
+
 // Mark that a card was viewed in a deck; returns true if this completed the deck for the first time
 function markCardSeen(deckKey, cardId, totalCount) {
   const p = getProgress();

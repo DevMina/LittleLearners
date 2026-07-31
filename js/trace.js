@@ -165,12 +165,15 @@ function scoreTracing() {
   return { accuracy, coverage, redCells };
 }
 
+let activityMarked = false;
+
 function celebrate() {
   if (!hasDrawnAnything) {
     speak("Try tracing the letter first!");
     return;
   }
 
+  if (!activityMarked) { markActivityToday(); activityMarked = true; }
   const { accuracy, coverage, redCells } = scoreTracing();
   const onTarget = redCells >= 12 && accuracy >= 0.6 && coverage >= 0.15;
 

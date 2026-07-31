@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
-<title>Little Learners – Tracing</title>
+<title>Little Learners – Sort It!</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#5FC9F3">
 <link rel="stylesheet" href="css/style.css">
@@ -12,34 +12,33 @@
 <div class="page">
   <div class="top-bar">
     <button class="back-btn" onclick="location.href='index.html'">&larr; Home</button>
-    <div class="mode-toggle" id="modeToggle" role="group" aria-label="Choose letters or numbers">
-      <button class="mode-toggle-btn active" id="modeLettersBtn" type="button">🔤 Letters</button>
-      <button class="mode-toggle-btn" id="modeNumbersBtn" type="button">🔢 Numbers</button>
-    </div>
+    <button class="icon-btn" id="newPairBtn">🔀 New pair</button>
   </div>
 
   <div class="title-wrap">
-    <h1>Tracing</h1>
-    <p>Trace it with your finger!</p>
+    <h1>Sort It!</h1>
   </div>
 
-  <div class="trace-stage">
-    <canvas id="traceCanvas" width="320" height="380"></canvas>
-    <div class="controls-row">
-      <button class="nav-btn" id="prevBtn" aria-label="Previous">&larr;</button>
-      <button class="icon-btn" id="clearBtn">🧹 Clear</button>
-      <button class="nav-btn" id="nextBtn" aria-label="Next">&rarr;</button>
-    </div>
-    <button class="play-again-btn" id="doneBtn">✅ I'm done!</button>
+  <div class="stat-row">
+    <div class="stat-pill">⭐ Score: <span id="scoreCount">0</span></div>
+    <div class="stat-pill">🎯 Round: <span id="roundCount">1</span>/<span id="roundTotal">10</span></div>
   </div>
+
+  <div class="find-prompt" id="prompt">Where does it go?</div>
+
+  <div class="sort-stage">
+    <div class="sort-item" id="sortItem"></div>
+  </div>
+
+  <div class="sort-bins" id="sortBins"></div>
 </div>
 
 <div class="win-banner" id="winBanner" style="display:none;">
   <div class="confetti-host" id="confettiHost"></div>
   <div class="win-card">
-    <h2 id="winTitle">✏️ Nice tracing!</h2>
-    <p id="winStats">Great work!</p>
-    <button class="play-again-btn" id="nextLetterBtn">Next one</button>
+    <h2>🌟 All done!</h2>
+    <p id="winStats">Nice work!</p>
+    <button class="play-again-btn" id="playAgainBtn">Play again</button>
   </div>
 </div>
 
@@ -47,7 +46,7 @@
 <script src="js/profiles.js"></script>
 <script src="js/storage.js"></script>
 <script src="js/app.js"></script>
-<script src="js/trace.js"></script>
+<script src="js/sort.js"></script>
 <footer class="site-footer">
   <p>© <span id="footerYear"></span> Mina Abdo. All rights reserved.</p>
   <div class="footer-links">

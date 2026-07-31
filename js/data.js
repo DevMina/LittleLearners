@@ -60,6 +60,8 @@ const DECKS = {
       { id: "star", label: "Star", shape: "star" },
       { id: "heart", label: "Heart", shape: "heart" },
       { id: "diamond", label: "Diamond", shape: "diamond" },
+      { id: "pentagon", label: "Pentagon", shape: "pentagon" },
+      { id: "hexagon", label: "Hexagon", shape: "hexagon" },
     ],
   },
   letters: {

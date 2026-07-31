@@ -59,6 +59,10 @@ let matched = 0;
 let moves = 0;
 let lock = false;
 let lastCardSetIds = null;
+// How many times each item's card has been involved in a mismatch this game — used the
+// same way Find It! and Count & Match track "missesThisRound", so Match now feeds Review
+// and the "needs practice" list too instead of being the one game that doesn't.
+let itemMissCounts = {};
 
 // autoMode = true: run the full 4-stage ramp (3 → 4 → 6 → 8 pairs), 3 games each, 12 total.
 // autoMode = false: parent locked a single pair count — play 3 games at just that level.
@@ -129,6 +133,7 @@ function setup() {
   matched = 0;
   moves = 0;
   flipped = [];
+  itemMissCounts = {};
   movesEl.textContent = "0";
   pairsEl.textContent = "0";
   winBanner.style.display = "none";
@@ -143,7 +148,7 @@ function sameIdSet(picks, ids) {
 
 // Shapes deck items only carry a shape name (e.g. "circle"), no emoji/swatch — map that
 // to a glyph so the memory game shows an actual shape instead of falling back to the word.
-const SHAPE_GLYPHS = { circle: "⚫", square: "◼️", triangle: "▲", star: "⭐", heart: "❤️", diamond: "🔶" };
+const SHAPE_GLYPHS = { circle: "⚫", square: "◼️", triangle: "▲", star: "⭐", heart: "❤️", diamond: "🔶", pentagon: "⬠", hexagon: "⬡" };
 
 function render() {
   board.innerHTML = "";
@@ -191,11 +196,14 @@ function flip(i) {
       pairsEl.textContent = matched;
       playTone("correct");
       speak(cards[a].item.label);
+      recordItemResult(deckKey2, cards[a].item.id, !itemMissCounts[cards[a].item.id]);
       flipped = [];
       lock = false;
       render();
       if (matched === PAIR_COUNT) setTimeout(win, 400);
     } else {
+      itemMissCounts[cards[a].item.id] = (itemMissCounts[cards[a].item.id] || 0) + 1;
+      itemMissCounts[cards[b].item.id] = (itemMissCounts[cards[b].item.id] || 0) + 1;
       playTone("wrong");
       setTimeout(() => {
         flipped = [];
@@ -206,6 +214,8 @@ function flip(i) {
   }
 }
 
+let autoAdvanceTimer = null;
+
 function win() {
   winBanner.style.display = "flex";
   document.getElementById("winStats").textContent = "You matched all " + PAIR_COUNT + " pairs in " + moves + " moves!";
@@ -214,12 +224,23 @@ function win() {
   speak("Great job! You found them all!");
   const quality = moves <= PAIR_COUNT * 1.3 ? 3 : moves <= PAIR_COUNT * 2 ? 2 : 1;
   recordGameResult("match", deckKey2, true, quality);
+  // Hands-free by default: after a short celebration, move on by itself (mirrors Find It!'s
+  // auto-advance). Tapping "Play again" early clears this and jumps straight there instead.
+  clearTimeout(autoAdvanceTimer);
+  autoAdvanceTimer = setTimeout(() => {
+    winBanner.style.display = "none";
+    advance();
+  }, 2200);
 }
 
 // Moves to the next game, advancing to the next stage (more pairs) once the current stage's
 // games are done. Play again always continues the ramp rather than restarting the whole run.
-document.getElementById("restartBtn").addEventListener("click", () => { setup(); });
-document.getElementById("playAgainBtn").addEventListener("click", advance);
+document.getElementById("restartBtn").addEventListener("click", () => { clearTimeout(autoAdvanceTimer); setup(); });
+document.getElementById("playAgainBtn").addEventListener("click", () => {
+  clearTimeout(autoAdvanceTimer);
+  winBanner.style.display = "none";
+  advance();
+});
 
 function advance() {
   if (gameInStage >= GAMES_PER_STAGE) {

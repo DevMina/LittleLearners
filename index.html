@@ -86,6 +86,12 @@
     <button class="tile coral" onclick="location.href='game-find.html?deck=animals'">
       <span class="tile-emoji">🔍</span>Find It!
     </button>
+    <button class="tile rose" onclick="location.href='count.html'">
+      <span class="tile-emoji">🔢</span>Count &amp; Match
+    </button>
+    <button class="tile olive" onclick="location.href='sort.html'">
+      <span class="tile-emoji">🗂️</span>Sort It!
+    </button>
     <button class="tile grape" onclick="location.href='trace.html?mode=letters'">
       <span class="tile-emoji">✏️</span>Tracing
     </button>
@@ -145,8 +151,8 @@
 
     // "Today's session" — one-tap pick of a deck + game, favoring weak items or a fresh deck
     const session = pickTodaysSession();
-    if (DECKS[session.deckKey]) {
-      document.getElementById("todaySessionSub").textContent = session.gameLabel + " · " + DECKS[session.deckKey].title;
+    if (session.subtitle) {
+      document.getElementById("todaySessionSub").textContent = session.gameLabel + " · " + session.subtitle;
     }
     document.getElementById("todaySessionBtn").addEventListener("click", () => (location.href = session.url));
   }

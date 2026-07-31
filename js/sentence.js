@@ -15,10 +15,12 @@ const starterBank = document.getElementById("starterBank");
 const nounBank = document.getElementById("nounBank");
 
 let sentence = [];
+let activityMarked = false;
 
 function addWord(word, emoji) {
   sentence.push({ word, emoji });
   playTone("tap");
+  if (!activityMarked) { markActivityToday(); activityMarked = true; }
   render();
 }
 

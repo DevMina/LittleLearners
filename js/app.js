@@ -91,8 +91,24 @@ function pickTodaysSession() {
     { page: "game-find.html", label: "Find It!" },
     { page: "game-match.html", label: "Memory Match" },
   ];
+  // Count & Match only teaches the Numbers deck (it has no deck picker of its own), so it
+  // only enters the rotation when Numbers is actually enabled, and always points at Numbers
+  // rather than whatever deck the weak-item/least-played logic above picked.
+  if (enabledDecks.includes("numbers")) {
+    rotation.push({ page: "count.html", label: "Count & Match", fixedDeckKey: "numbers" });
+  }
+  // Sort It! self-picks a pair of categories from a fixed pool, not a single deck, so it
+  // needs at least 2 of that pool enabled before it's worth suggesting.
+  const SORT_POOL = ["animals", "food", "vehicles", "bodyParts"];
+  const sortPoolEnabled = SORT_POOL.filter((k) => enabledDecks.includes(k));
+  if (sortPoolEnabled.length >= 2) {
+    rotation.push({ page: "sort.html", label: "Sort It!", customSubtitle: "Sorting practice" });
+  }
   const pick = rotation[dayIndex % rotation.length];
-  return { url: pick.page + "?deck=" + deckKey, deckKey, gameLabel: pick.label };
+  const finalDeckKey = pick.fixedDeckKey || deckKey;
+  const url = pick.fixedDeckKey || pick.customSubtitle ? pick.page : pick.page + "?deck=" + finalDeckKey;
+  const subtitle = pick.customSubtitle || (DECKS[finalDeckKey] && DECKS[finalDeckKey].title);
+  return { url, deckKey: finalDeckKey, gameLabel: pick.label, subtitle };
 }
 
 // ---------- iOS "Add to Home Screen" hint ----------
