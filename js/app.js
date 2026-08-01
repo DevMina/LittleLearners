@@ -117,6 +117,33 @@ function pickTodaysSession() {
   if (enabledDecks.includes("numbers")) {
     rotation.push({ page: "order.html", label: "Put In Order", fixedDeckKey: "numbers" });
   }
+  // Opposites and How Do You Feel? each teach exactly one fixed deck, same as Count & Match.
+  if (enabledDecks.includes("opposites")) {
+    rotation.push({ page: "opposites.html", label: "Opposites", fixedDeckKey: "opposites" });
+  }
+  if (enabledDecks.includes("emotions")) {
+    rotation.push({ page: "feelings.html", label: "How Do You Feel?", fixedDeckKey: "emotions" });
+  }
+  // Rhyme Time has its own word list outside DECKS entirely, so there's no deck to gate on.
+  rotation.push({ page: "rhyme.html", label: "Rhyme Time", customSubtitle: "Rhyming words" });
+  // Read It! and Big & Little Letters each teach exactly one fixed deck, same as Count & Match.
+  if (enabledDecks.includes("sightWords")) {
+    rotation.push({ page: "read.html", label: "Read It!", fixedDeckKey: "sightWords" });
+  }
+  if (enabledDecks.includes("letters")) {
+    rotation.push({ page: "case.html", label: "Big & Little Letters", fixedDeckKey: "letters" });
+  }
+  // More or Less teaches quantity comparison using generic objects, not deck pictures, but
+  // it's conceptually a Numbers activity, so it's gated the same way as Count & Match.
+  if (enabledDecks.includes("numbers")) {
+    rotation.push({ page: "moreless.html", label: "More or Less", fixedDeckKey: "numbers" });
+  }
+  // Color Hunt teaches the Colors deck specifically, same gating as Count & Match.
+  if (enabledDecks.includes("colors")) {
+    rotation.push({ page: "colorhunt.html", label: "Color Hunt", fixedDeckKey: "colors" });
+  }
+  // Same or Different draws from a broad pool, same handling as Sort It!/Odd One Out.
+  rotation.push({ page: "samediff.html", label: "Same or Different?", customSubtitle: "Compare & match" });
   const pick = rotation[dayIndex % rotation.length];
   const finalDeckKey = pick.fixedDeckKey || deckKey;
   const url = pick.fixedDeckKey || pick.customSubtitle ? pick.page : pick.page + "?deck=" + finalDeckKey;
@@ -197,6 +224,35 @@ document.addEventListener("DOMContentLoaded", () => {
   const yearEl = document.getElementById("footerYear");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 });
+
+// ---------- Daily practice reminder (best-effort) ----------
+// See service-worker.js for the full honesty caveat: Periodic Background Sync only exists on
+// Android/Chrome, isn't guaranteed to actually fire, and there's no path to it on iOS Safari
+// at all for a PWA with no push server. This does the best any client-only PWA can do, and
+// resolves with a status string so the Settings toggle can show the person what happened
+// instead of silently pretending it always works.
+async function requestPracticeReminder() {
+  if (!("Notification" in window)) return "unsupported";
+  const permission = await Notification.requestPermission();
+  if (permission !== "granted") return "denied";
+
+  if (!("serviceWorker" in navigator) || !("periodicSync" in (await navigator.serviceWorker.ready))) {
+    return "no-background-support"; // permission granted, but the browser can't run anything while closed
+  }
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    await reg.periodicSync.register("daily-practice-reminder", { minInterval: 20 * 60 * 60 * 1000 });
+    return "scheduled";
+  } catch (e) {
+    return "no-background-support";
+  }
+}
+
+function cancelPracticeReminder() {
+  navigator.serviceWorker.ready.then((reg) => {
+    if (reg.periodicSync) reg.periodicSync.unregister("daily-practice-reminder").catch(() => {});
+  });
+}
 
 // ---------- "More below" scroll cue ----------
 // A subtle bottom fade + bouncing chevron that appears only when there's more

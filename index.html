@@ -92,17 +92,41 @@
     <button class="tile olive" onclick="location.href='sort.html'">
       <span class="tile-emoji">🗂️</span>Sort It!
     </button>
+    <button class="tile grape" onclick="location.href='opposites.html'">
+      <span class="tile-emoji">🔄</span>Opposites
+    </button>
     <button class="tile tan" onclick="location.href='phonics.html'">
       <span class="tile-emoji">🔤</span>Starts With
+    </button>
+    <button class="tile coral" onclick="location.href='rhyme.html'">
+      <span class="tile-emoji">🎵</span>Rhyme Time
+    </button>
+    <button class="tile sun" onclick="location.href='read.html'">
+      <span class="tile-emoji">📗</span>Read It!
+    </button>
+    <button class="tile grape" onclick="location.href='colorhunt.html'">
+      <span class="tile-emoji">🎨</span>Color Hunt
     </button>
     <button class="tile peach" onclick="location.href='odd.html'">
       <span class="tile-emoji">🧐</span>Odd One Out
     </button>
+    <button class="tile rose" onclick="location.href='feelings.html'">
+      <span class="tile-emoji">😊</span>How Do You Feel?
+    </button>
+    <button class="tile olive" onclick="location.href='samediff.html'">
+      <span class="tile-emoji">🔍</span>Same or Different?
+    </button>
     <button class="tile coral" onclick="location.href='order.html'">
       <span class="tile-emoji">🔢</span>Put In Order
     </button>
+    <button class="tile olive" onclick="location.href='moreless.html'">
+      <span class="tile-emoji">⚖️</span>More or Less
+    </button>
     <button class="tile grape" onclick="location.href='trace.html?mode=letters'">
       <span class="tile-emoji">✏️</span>Tracing
+    </button>
+    <button class="tile teal" onclick="location.href='case.html'">
+      <span class="tile-emoji">🔡</span>Big &amp; Little Letters
     </button>
     <button class="tile grass" onclick="location.href='sentence.html'">
       <span class="tile-emoji">💬</span>Sentence Builder
@@ -164,6 +188,12 @@
       document.getElementById("todaySessionSub").textContent = session.gameLabel + " · " + session.subtitle;
     }
     document.getElementById("todaySessionBtn").addEventListener("click", () => (location.href = session.url));
+
+    // Launched from the manifest's "Today's Session" home-screen shortcut — skip straight to
+    // it instead of making the person land on the home screen and tap again.
+    if (new URLSearchParams(location.search).get("quicklaunch") === "today") {
+      location.replace(session.url);
+    }
   }
 
   // Build deck tiles from settings (parent-enabled decks only)

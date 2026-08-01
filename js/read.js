@@ -1,25 +1,16 @@
 if (!requireProfile()) { /* redirecting to profile picker */ }
 
-// Picture decks only — Letters/First Words have no picture to sound out, and Numbers'
-// labels are digits, not words with an initial letter.
-const PHONICS_DECK_KEYS = ["animals", "colors", "shapes", "vehicles", "food", "bodyParts", "emotions", "opposites"];
+// The First Words (sight words) deck was sitting completely unused everywhere else in the
+// app — this is the only game that actually puts it to work. The child hears the word
+// spoken but never sees it written until they've picked — early sight-word reading is about
+// recognizing the whole printed shape of a word, not sounding it out letter by letter.
+const wordItems = DECKS.sightWords.items;
 const ROUNDS = 10;
-const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-
-// Same enabledDecks handling as Sort It!/Odd One Out — this one only needs 1 deck to work,
-// so it only falls back to the full pool if the parent disabled literally all of them.
-function getPhonicsPool() {
-  const enabled = getSettings().enabledDecks;
-  if (!enabled || !enabled.length) return PHONICS_DECK_KEYS;
-  const filtered = PHONICS_DECK_KEYS.filter((k) => enabled.includes(k));
-  return filtered.length >= 1 ? filtered : PHONICS_DECK_KEYS;
-}
 
 const scoreEl = document.getElementById("scoreCount");
 const roundEl = document.getElementById("roundCount");
 const roundTotalEl = document.getElementById("roundTotal");
 const prompt = document.getElementById("prompt");
-const picStage = document.getElementById("picStage");
 const board = document.getElementById("board");
 const winBanner = document.getElementById("winBanner");
 const confettiHost = document.getElementById("confettiHost");
@@ -28,30 +19,24 @@ roundTotalEl.textContent = ROUNDS;
 
 let score = 0;
 let round = 1;
-let target = null;       // the picture item this round
-let targetDeckKey = null;
-let targetLetter = "";
+let target = null;
 let missesThisRound = 0;
 let lock = false;
 let lastItemId = null;
 
 function pickTarget() {
-  const pool = getPhonicsPool();
-  const dk = pool[Math.floor(Math.random() * pool.length)];
-  const items = DECKS[dk].items;
-  let item = items[Math.floor(Math.random() * items.length)];
-  if (item.id === lastItemId && items.length > 1) {
-    item = items[Math.floor(Math.random() * items.length)];
+  let item = wordItems[Math.floor(Math.random() * wordItems.length)];
+  if (item.id === lastItemId && wordItems.length > 1) {
+    item = wordItems[Math.floor(Math.random() * wordItems.length)];
   }
   lastItemId = item.id;
-  targetDeckKey = dk;
   target = item;
-  targetLetter = item.label.charAt(0).toUpperCase();
 }
 
-function buildLetterChoices() {
-  const distractors = shuffle(ALPHABET.filter((l) => l !== targetLetter)).slice(0, 2);
-  return shuffle([targetLetter, ...distractors]);
+function buildChoices() {
+  const pool = wordItems.filter((it) => it.id !== target.id);
+  const distractors = shuffle(pool).slice(0, 3);
+  return shuffle([target, ...distractors]);
 }
 
 function newRound() {
@@ -59,32 +44,31 @@ function newRound() {
   missesThisRound = 0;
   pickTarget();
   roundEl.textContent = round;
-  prompt.textContent = "What does it start with?";
-  renderCardVisual(target, picStage);
+  prompt.textContent = "Which word is this?";
 
   board.innerHTML = "";
-  buildLetterChoices().forEach((letter) => {
+  buildChoices().forEach((item) => {
     const btn = document.createElement("button");
-    btn.className = "game-tile find-tile";
-    btn.setAttribute("aria-label", letter);
-    btn.textContent = letter;
-    btn.addEventListener("click", () => chooseLetter(letter, btn));
+    btn.className = "game-tile find-tile word-tile";
+    btn.setAttribute("aria-label", item.label);
+    btn.textContent = item.label;
+    btn.addEventListener("click", () => chooseOption(item, btn));
     board.appendChild(btn);
   });
 
   setTimeout(() => speak(target.label), 250);
 }
 
-function chooseLetter(letter, btn) {
+function chooseOption(item, btn) {
   if (lock) return;
-  if (letter === targetLetter) {
+  if (item.id === target.id) {
     lock = true;
     score++;
     scoreEl.textContent = score;
     playTone("correct");
-    speak(target.label + " starts with " + letter + "!");
+    speak("Yes! " + target.label + "!");
     btn.style.background = "#6BCB77";
-    recordItemResult(targetDeckKey, target.id, missesThisRound === 0);
+    recordItemResult("sightWords", target.id, missesThisRound === 0);
     setTimeout(advance, 900);
   } else {
     missesThisRound++;
@@ -112,7 +96,7 @@ function finish() {
   speak("All done! You scored " + score + " out of " + ROUNDS);
   const fraction = score / ROUNDS;
   const quality = fraction >= 0.85 ? 3 : fraction >= 0.6 ? 2 : 1;
-  recordGameResult("phonics", "mixed", true, quality);
+  recordGameResult("read", "sightWords", true, quality);
 }
 
 document.getElementById("repeatBtn").addEventListener("click", () => speak(target.label));

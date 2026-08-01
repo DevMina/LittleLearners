@@ -1,19 +1,10 @@
 if (!requireProfile()) { /* redirecting to profile picker */ }
 
-// Picture decks only — Letters/First Words have no picture to sound out, and Numbers'
-// labels are digits, not words with an initial letter.
-const PHONICS_DECK_KEYS = ["animals", "colors", "shapes", "vehicles", "food", "bodyParts", "emotions", "opposites"];
+// Reuses the Letters deck (uppercase A-Z) as the source of truth and derives the lowercase
+// form on the fly — this is a genuinely different skill from Tracing (motor formation) and
+// Starts With (letter-to-sound), namely recognizing that "A" and "a" are the same letter.
+const letterItems = DECKS.letters.items;
 const ROUNDS = 10;
-const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-
-// Same enabledDecks handling as Sort It!/Odd One Out — this one only needs 1 deck to work,
-// so it only falls back to the full pool if the parent disabled literally all of them.
-function getPhonicsPool() {
-  const enabled = getSettings().enabledDecks;
-  if (!enabled || !enabled.length) return PHONICS_DECK_KEYS;
-  const filtered = PHONICS_DECK_KEYS.filter((k) => enabled.includes(k));
-  return filtered.length >= 1 ? filtered : PHONICS_DECK_KEYS;
-}
 
 const scoreEl = document.getElementById("scoreCount");
 const roundEl = document.getElementById("roundCount");
@@ -28,30 +19,24 @@ roundTotalEl.textContent = ROUNDS;
 
 let score = 0;
 let round = 1;
-let target = null;       // the picture item this round
-let targetDeckKey = null;
-let targetLetter = "";
+let target = null;       // uppercase deck item
 let missesThisRound = 0;
 let lock = false;
 let lastItemId = null;
 
 function pickTarget() {
-  const pool = getPhonicsPool();
-  const dk = pool[Math.floor(Math.random() * pool.length)];
-  const items = DECKS[dk].items;
-  let item = items[Math.floor(Math.random() * items.length)];
-  if (item.id === lastItemId && items.length > 1) {
-    item = items[Math.floor(Math.random() * items.length)];
+  let item = letterItems[Math.floor(Math.random() * letterItems.length)];
+  if (item.id === lastItemId) {
+    item = letterItems[Math.floor(Math.random() * letterItems.length)];
   }
   lastItemId = item.id;
-  targetDeckKey = dk;
   target = item;
-  targetLetter = item.label.charAt(0).toUpperCase();
 }
 
-function buildLetterChoices() {
-  const distractors = shuffle(ALPHABET.filter((l) => l !== targetLetter)).slice(0, 2);
-  return shuffle([targetLetter, ...distractors]);
+function buildChoices() {
+  const pool = letterItems.filter((it) => it.id !== target.id);
+  const distractors = shuffle(pool).slice(0, 3);
+  return shuffle([target, ...distractors]);
 }
 
 function newRound() {
@@ -59,32 +44,33 @@ function newRound() {
   missesThisRound = 0;
   pickTarget();
   roundEl.textContent = round;
-  prompt.textContent = "What does it start with?";
+  prompt.textContent = "Find the little letter!";
   renderCardVisual(target, picStage);
 
   board.innerHTML = "";
-  buildLetterChoices().forEach((letter) => {
+  buildChoices().forEach((item) => {
+    const lower = item.letter.toLowerCase();
     const btn = document.createElement("button");
     btn.className = "game-tile find-tile";
-    btn.setAttribute("aria-label", letter);
-    btn.textContent = letter;
-    btn.addEventListener("click", () => chooseLetter(letter, btn));
+    btn.setAttribute("aria-label", lower);
+    btn.textContent = lower;
+    btn.addEventListener("click", () => chooseOption(item, btn));
     board.appendChild(btn);
   });
 
-  setTimeout(() => speak(target.label), 250);
+  setTimeout(() => speak(target.letter), 250);
 }
 
-function chooseLetter(letter, btn) {
+function chooseOption(item, btn) {
   if (lock) return;
-  if (letter === targetLetter) {
+  if (item.id === target.id) {
     lock = true;
     score++;
     scoreEl.textContent = score;
     playTone("correct");
-    speak(target.label + " starts with " + letter + "!");
+    speak(target.letter + " and " + item.letter.toLowerCase() + " — same letter!");
     btn.style.background = "#6BCB77";
-    recordItemResult(targetDeckKey, target.id, missesThisRound === 0);
+    recordItemResult("letters", target.id, missesThisRound === 0);
     setTimeout(advance, 900);
   } else {
     missesThisRound++;
@@ -112,10 +98,10 @@ function finish() {
   speak("All done! You scored " + score + " out of " + ROUNDS);
   const fraction = score / ROUNDS;
   const quality = fraction >= 0.85 ? 3 : fraction >= 0.6 ? 2 : 1;
-  recordGameResult("phonics", "mixed", true, quality);
+  recordGameResult("case", "letters", true, quality);
 }
 
-document.getElementById("repeatBtn").addEventListener("click", () => speak(target.label));
+document.getElementById("repeatBtn").addEventListener("click", () => speak(target.letter));
 document.getElementById("playAgainBtn").addEventListener("click", () => {
   winBanner.style.display = "none";
   score = 0;

@@ -45,6 +45,7 @@ function openModal(profile) {
   editingId = profile ? profile.id : null;
   modalTitle.textContent = profile ? "Edit learner" : "New learner";
   nameInput.value = profile ? profile.name : "";
+  document.getElementById("modalStatus").textContent = "";
   selectedAvatar = profile ? { emoji: profile.emoji, color: profile.color } : AVATAR_OPTIONS[0];
   deleteBtn.style.display = profile ? "block" : "none";
   buildAvatarPicker();
@@ -68,7 +69,11 @@ function buildAvatarPicker() {
 document.getElementById("modalCancelBtn").addEventListener("click", () => (modal.style.display = "none"));
 document.getElementById("modalSaveBtn").addEventListener("click", () => {
   const name = nameInput.value.trim();
-  if (!name) return;
+  const status = document.getElementById("modalStatus");
+  if (!name) {
+    status.textContent = "Please enter a name first.";
+    return;
+  }
   if (editingId) updateProfile(editingId, { name, emoji: selectedAvatar.emoji, color: selectedAvatar.color });
   else createProfile(name, selectedAvatar);
   modal.style.display = "none";

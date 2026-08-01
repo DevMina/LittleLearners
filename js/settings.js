@@ -78,15 +78,48 @@ function initSettingsPage() {
     list.appendChild(row);
   });
 
-  // Progress summary
+  // Progress summary — uses the same mastery signal as the Progress/Digest page (real
+  // per-item accuracy across games), not the "flashcards fully browsed" star used for the
+  // little badge on the home screen deck tiles. Those are two different, legitimate signals;
+  // showing the browsing one here under the word "Complete" used to contradict Digest's
+  // "Mastered" list for the same deck.
   const progWrap = document.getElementById("progressSummary");
   progWrap.innerHTML = "";
   Object.keys(DECKS).forEach((key) => {
-    const stars = getDeckStars(key);
+    const mastered = isDeckMastered(key);
     const row = document.createElement("div");
     row.className = "progress-row";
-    row.innerHTML = `<span>${DECKS[key].title}</span><span>${stars ? "⭐ Complete" : "— Not yet"}</span>`;
+    row.innerHTML = `<span>${DECKS[key].title}</span><span>${mastered ? "🏆 Mastered" : "Still learning"}</span>`;
     progWrap.appendChild(row);
+  });
+
+  // Daily reminder (best-effort — see the note above the toggle in settings.html)
+  const reminderCheck = document.getElementById("reminderCheck");
+  const reminderStatus = document.getElementById("reminderStatus");
+  reminderCheck.checked = !!s.reminderEnabled;
+  reminderCheck.addEventListener("change", async (e) => {
+    if (e.target.checked) {
+      reminderStatus.textContent = "Requesting permission…";
+      const result = await requestPracticeReminder();
+      if (result === "scheduled") {
+        saveSettings({ reminderEnabled: true });
+        reminderStatus.textContent = "Reminder scheduled — best-effort, see note above.";
+      } else if (result === "denied") {
+        e.target.checked = false;
+        reminderStatus.textContent = "Notifications were blocked — check your browser/phone settings.";
+      } else if (result === "unsupported") {
+        e.target.checked = false;
+        reminderStatus.textContent = "This browser doesn't support notifications at all.";
+      } else {
+        e.target.checked = false;
+        saveSettings({ reminderEnabled: false });
+        reminderStatus.textContent = "Permission granted, but this browser can't run reminders in the background.";
+      }
+    } else {
+      saveSettings({ reminderEnabled: false });
+      cancelPracticeReminder();
+      reminderStatus.textContent = "Reminder turned off.";
+    }
   });
 
   document.getElementById("resetBtn").addEventListener("click", () => {

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Little Learners – More or Less</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#5FC9F3">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="page">
+  <div class="top-bar">
+    <button class="back-btn" onclick="location.href='index.html'">&larr; Home</button>
+    <button class="icon-btn" id="repeatBtn">🔊 Repeat</button>
+  </div>
+
+  <div class="title-wrap">
+    <h1>More or Less</h1>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-pill">⭐ Score: <span id="scoreCount">0</span></div>
+    <div class="stat-pill">🎯 Round: <span id="roundCount">1</span>/<span id="roundTotal">15</span></div>
+  </div>
+
+  <div class="difficulty-row" id="difficultyRow">
+    <span>Up to:</span>
+    <button class="diff-btn" data-n="3">3</button>
+    <button class="diff-btn" data-n="5">5</button>
+    <button class="diff-btn" data-n="7">7</button>
+    <button class="diff-btn diff-auto">🔁 Auto</button>
+  </div>
+  <p class="stage-label" id="stageLabel"></p>
+
+  <div class="find-prompt" id="prompt">Which side has more?</div>
+
+  <div class="moreless-row" id="board"></div>
+</div>
+
+<div class="win-banner" id="winBanner" style="display:none;">
+  <div class="confetti-host" id="confettiHost"></div>
+  <div class="win-card">
+    <h2>🌟 All done!</h2>
+    <p id="winStats">Nice work!</p>
+    <button class="play-again-btn" id="playAgainBtn">Play again</button>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/profiles.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/app.js"></script>
+<script src="js/moreless.js"></script>
+<footer class="site-footer">
+  <p>© <span id="footerYear"></span> Mina Abdo. All rights reserved.</p>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="contact.html">Contact Us</a>
+  </div>
+</footer>
+
+</body>
+</html>

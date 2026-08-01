@@ -7,6 +7,16 @@ if (!requireProfile()) { /* redirecting to profile picker */ }
 const SORT_DECK_KEYS = ["animals", "food", "vehicles", "bodyParts"];
 const ROUNDS = 10;
 
+// Respects the "Decks shown on home screen" setting where possible — but sorting needs at
+// least 2 categories to make a pair, so if the parent disabled all but one (or zero) of
+// these decks, fall back to the full pool rather than getting stuck with nothing to sort.
+function getSortPool() {
+  const enabled = getSettings().enabledDecks;
+  if (!enabled || !enabled.length) return SORT_DECK_KEYS;
+  const filtered = SORT_DECK_KEYS.filter((k) => enabled.includes(k));
+  return filtered.length >= 2 ? filtered : SORT_DECK_KEYS;
+}
+
 const scoreEl = document.getElementById("scoreCount");
 const roundEl = document.getElementById("roundCount");
 const roundTotalEl = document.getElementById("roundTotal");
@@ -28,7 +38,7 @@ let lock = false;
 let lastItemId = null;
 
 function pickCategoryPair() {
-  const pool = shuffle(SORT_DECK_KEYS.slice());
+  const pool = shuffle(getSortPool());
   catA = pool[0];
   catB = pool[1];
 }

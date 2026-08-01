@@ -8,6 +8,7 @@ const DEFAULT_SETTINGS = {
   volume: 1,
   sfx: true,
   sessionMinutes: 0,   // 0 = off
+  reminderEnabled: false,
   enabledDecks: ["animals", "colors", "numbers", "shapes", "letters"],
 };
 

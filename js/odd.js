@@ -5,6 +5,15 @@ if (!requireProfile()) { /* redirecting to profile picker */ }
 const ODD_DECK_KEYS = ["animals", "food", "vehicles", "bodyParts"];
 const ROUNDS = 10;
 
+// Same enabledDecks handling as Sort It! — needs at least 2 categories (one to match, one
+// to be the odd one out), so falls back to the full pool if too few are enabled.
+function getOddPool() {
+  const enabled = getSettings().enabledDecks;
+  if (!enabled || !enabled.length) return ODD_DECK_KEYS;
+  const filtered = ODD_DECK_KEYS.filter((k) => enabled.includes(k));
+  return filtered.length >= 2 ? filtered : ODD_DECK_KEYS;
+}
+
 const scoreEl = document.getElementById("scoreCount");
 const roundEl = document.getElementById("roundCount");
 const roundTotalEl = document.getElementById("roundTotal");
@@ -28,13 +37,13 @@ function newRound() {
   lock = false;
   missesThisRound = 0;
 
-  let sameDeckKey = ODD_DECK_KEYS[Math.floor(Math.random() * ODD_DECK_KEYS.length)];
-  if (sameDeckKey === lastSameDeckKey && ODD_DECK_KEYS.length > 1) {
-    sameDeckKey = ODD_DECK_KEYS[Math.floor(Math.random() * ODD_DECK_KEYS.length)];
+  let sameDeckKey = getOddPool()[Math.floor(Math.random() * getOddPool().length)];
+  if (sameDeckKey === lastSameDeckKey && getOddPool().length > 1) {
+    sameDeckKey = getOddPool()[Math.floor(Math.random() * getOddPool().length)];
   }
   lastSameDeckKey = sameDeckKey;
 
-  const otherDecks = ODD_DECK_KEYS.filter((k) => k !== sameDeckKey);
+  const otherDecks = getOddPool().filter((k) => k !== sameDeckKey);
   oddDeckKey = otherDecks[Math.floor(Math.random() * otherDecks.length)];
 
   const sameItems = shuffle(DECKS[sameDeckKey].items).slice(0, 3);

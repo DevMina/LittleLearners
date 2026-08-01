@@ -1,19 +1,20 @@
 if (!requireProfile()) { /* redirecting to profile picker */ }
 
-// Picture decks only — Letters/First Words have no picture to sound out, and Numbers'
-// labels are digits, not words with an initial letter.
-const PHONICS_DECK_KEYS = ["animals", "colors", "shapes", "vehicles", "food", "bodyParts", "emotions", "opposites"];
-const ROUNDS = 10;
-const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+// The Colors deck is just abstract swatches (no linked objects), so real-world color
+// associations are authored here — this is what actually puts that deck to use in a game.
+const COLOR_OBJECTS = {
+  red: ["🍎", "🍓", "🌹", "🚒"],
+  yellow: ["🍌", "⭐", "🌻", "🐤"],
+  green: ["🐸", "🥦", "🌳", "🍀"],
+  purple: ["🍇", "🍆", "🔮", "👾"],
+  orange: ["🍊", "🥕", "🦊", "🎃"],
+  pink: ["🌸", "🐷", "🦩", "🎀"],
+  brown: ["🐻", "🌰", "🍫", "🦫"],
+  black: ["🎩", "🦇", "🎱", "🕶️"],
+};
 
-// Same enabledDecks handling as Sort It!/Odd One Out — this one only needs 1 deck to work,
-// so it only falls back to the full pool if the parent disabled literally all of them.
-function getPhonicsPool() {
-  const enabled = getSettings().enabledDecks;
-  if (!enabled || !enabled.length) return PHONICS_DECK_KEYS;
-  const filtered = PHONICS_DECK_KEYS.filter((k) => enabled.includes(k));
-  return filtered.length >= 1 ? filtered : PHONICS_DECK_KEYS;
-}
+const ROUNDS = 10;
+const colorItems = DECKS.colors.items;
 
 const scoreEl = document.getElementById("scoreCount");
 const roundEl = document.getElementById("roundCount");
@@ -28,30 +29,32 @@ roundTotalEl.textContent = ROUNDS;
 
 let score = 0;
 let round = 1;
-let target = null;       // the picture item this round
-let targetDeckKey = null;
-let targetLetter = "";
+let target = null;         // a colors deck item (swatch + label)
+let correctEmoji = null;
 let missesThisRound = 0;
 let lock = false;
 let lastItemId = null;
 
 function pickTarget() {
-  const pool = getPhonicsPool();
-  const dk = pool[Math.floor(Math.random() * pool.length)];
-  const items = DECKS[dk].items;
-  let item = items[Math.floor(Math.random() * items.length)];
-  if (item.id === lastItemId && items.length > 1) {
-    item = items[Math.floor(Math.random() * items.length)];
+  let item = colorItems[Math.floor(Math.random() * colorItems.length)];
+  if (item.id === lastItemId) {
+    item = colorItems[Math.floor(Math.random() * colorItems.length)];
   }
   lastItemId = item.id;
-  targetDeckKey = dk;
   target = item;
-  targetLetter = item.label.charAt(0).toUpperCase();
+  const objects = COLOR_OBJECTS[item.id];
+  correctEmoji = objects[Math.floor(Math.random() * objects.length)];
 }
 
-function buildLetterChoices() {
-  const distractors = shuffle(ALPHABET.filter((l) => l !== targetLetter)).slice(0, 2);
-  return shuffle([targetLetter, ...distractors]);
+function buildChoices() {
+  const otherColors = colorItems.filter((it) => it.id !== target.id);
+  const distractors = [];
+  const usedColors = shuffle(otherColors).slice(0, 3);
+  usedColors.forEach((c) => {
+    const objects = COLOR_OBJECTS[c.id];
+    distractors.push(objects[Math.floor(Math.random() * objects.length)]);
+  });
+  return shuffle([correctEmoji, ...distractors]);
 }
 
 function newRound() {
@@ -59,32 +62,32 @@ function newRound() {
   missesThisRound = 0;
   pickTarget();
   roundEl.textContent = round;
-  prompt.textContent = "What does it start with?";
+  prompt.textContent = "Find something " + target.label + "!";
   renderCardVisual(target, picStage);
 
   board.innerHTML = "";
-  buildLetterChoices().forEach((letter) => {
+  buildChoices().forEach((emoji) => {
     const btn = document.createElement("button");
     btn.className = "game-tile find-tile";
-    btn.setAttribute("aria-label", letter);
-    btn.textContent = letter;
-    btn.addEventListener("click", () => chooseLetter(letter, btn));
+    btn.setAttribute("aria-label", emoji);
+    btn.textContent = emoji;
+    btn.addEventListener("click", () => chooseOption(emoji, btn));
     board.appendChild(btn);
   });
 
-  setTimeout(() => speak(target.label), 250);
+  setTimeout(() => speak("Find something " + target.label + "!"), 250);
 }
 
-function chooseLetter(letter, btn) {
+function chooseOption(emoji, btn) {
   if (lock) return;
-  if (letter === targetLetter) {
+  if (emoji === correctEmoji) {
     lock = true;
     score++;
     scoreEl.textContent = score;
     playTone("correct");
-    speak(target.label + " starts with " + letter + "!");
+    speak("Yes! That's " + target.label + "!");
     btn.style.background = "#6BCB77";
-    recordItemResult(targetDeckKey, target.id, missesThisRound === 0);
+    recordItemResult("colors", target.id, missesThisRound === 0);
     setTimeout(advance, 900);
   } else {
     missesThisRound++;
@@ -112,10 +115,10 @@ function finish() {
   speak("All done! You scored " + score + " out of " + ROUNDS);
   const fraction = score / ROUNDS;
   const quality = fraction >= 0.85 ? 3 : fraction >= 0.6 ? 2 : 1;
-  recordGameResult("phonics", "mixed", true, quality);
+  recordGameResult("colorhunt", "colors", true, quality);
 }
 
-document.getElementById("repeatBtn").addEventListener("click", () => speak(target.label));
+document.getElementById("repeatBtn").addEventListener("click", () => speak("Find something " + target.label + "!"));
 document.getElementById("playAgainBtn").addEventListener("click", () => {
   winBanner.style.display = "none";
   score = 0;

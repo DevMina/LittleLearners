@@ -12,6 +12,14 @@ const APP_SHELL = [
   "./count.html",
   "./sort.html",
   "./phonics.html",
+  "./opposites.html",
+  "./feelings.html",
+  "./rhyme.html",
+  "./read.html",
+  "./case.html",
+  "./moreless.html",
+  "./colorhunt.html",
+  "./samediff.html",
   "./odd.html",
   "./order.html",
   "./trace.html",
@@ -35,6 +43,14 @@ const APP_SHELL = [
   "./js/count.js",
   "./js/sort.js",
   "./js/phonics.js",
+  "./js/opposites.js",
+  "./js/feelings.js",
+  "./js/rhyme.js",
+  "./js/read.js",
+  "./js/case.js",
+  "./js/moreless.js",
+  "./js/colorhunt.js",
+  "./js/samediff.js",
   "./js/odd.js",
   "./js/order.js",
   "./js/trace.js",
@@ -69,6 +85,37 @@ self.addEventListener("activate", (event) => {
     caches.keys().then((keys) =>
       Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
     ).then(() => self.clients.claim())
+  );
+});
+
+// ---------- Daily practice reminder (best-effort) ----------
+// Periodic Background Sync is the only way a PWA without a push server can fire a
+// notification while fully closed — but it's Android/Chrome-only (no iOS Safari support at
+// all), and even there the browser decides if/when it actually runs based on its own
+// engagement heuristics, so this can't be guaranteed to fire daily, or at all, for every user.
+// It also can't check "did the child already practice today" — a service worker has no
+// access to this app's localStorage-based progress data — so it's a simple generic nudge,
+// not a smart one. See js/app.js's requestPracticeReminder() for where this gets registered.
+self.addEventListener("periodicsync", (event) => {
+  if (event.tag === "daily-practice-reminder") {
+    event.waitUntil(
+      self.registration.showNotification("Little Learners", {
+        body: "A few minutes of practice today? 🌟",
+        icon: "./img/icon-192.png",
+        tag: "daily-practice-reminder",
+      })
+    );
+  }
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  event.waitUntil(
+    self.clients.matchAll({ type: "window" }).then((clients) => {
+      const existing = clients.find((c) => "focus" in c);
+      if (existing) return existing.focus();
+      return self.clients.openWindow("./index.html");
+    })
   );
 });
 

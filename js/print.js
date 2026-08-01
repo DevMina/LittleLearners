@@ -58,7 +58,7 @@ function selectWeakSpots() {
   if (weakItems.length === 0) {
     printSheet.innerHTML =
       `<div class="print-heading">Little Learners — Needs a little practice</div>` +
-      `<p class="print-empty-note">No practice list yet — play Find It! or use the mic on some flashcards, then come back here.</p>`;
+      `<p class="print-empty-note">No practice list yet — play a few games or try the mic on some flashcards, then come back here.</p>`;
     return;
   }
   printSheet.innerHTML = `<div class="print-heading">Little Learners — Needs a little practice</div><div class="print-grid"></div>`;
