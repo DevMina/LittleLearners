@@ -206,6 +206,22 @@ function initServiceWorker() {
 }
 initServiceWorker();
 
+// ---------- One-time migration: opt existing users into newly-added decks ----------
+// New decks only reach brand-new profiles via DEFAULT_SETTINGS — anyone who already has
+// settings saved keeps whatever enabledDecks list was persisted at the time, so a parent
+// could add Days of the Week / Good Manners to data.js and existing families would never see
+// them without digging into Settings. This runs once and adds only decks that couldn't
+// possibly have been a deliberate prior choice, since they didn't exist before this update.
+(function migrateNewDecksIntoEnabled() {
+  if (typeof getSettings !== "function" || typeof saveSettings !== "function") return;
+  const NEWLY_ADDED_DECKS = ["days", "manners"];
+  const s = getSettings();
+  const missing = NEWLY_ADDED_DECKS.filter((k) => !s.enabledDecks.includes(k));
+  if (missing.length) {
+    saveSettings({ enabledDecks: [...s.enabledDecks, ...missing] });
+  }
+})();
+
 function showUpdateToast() {
   if (document.getElementById("updateToast")) return;
   const toast = document.createElement("div");

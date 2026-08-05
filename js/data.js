@@ -154,6 +154,29 @@ const DECKS = {
       letter: w,
     })),
   },
+  days: {
+    title: "Days of the Week",
+    color: "grass",
+    // Reading-based like First Words (there's no meaningful picture for "Tuesday"), so this
+    // uses the same `letter` field — renderCardVisual already auto-sizes it for a whole word.
+    items: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].map((d) => ({
+      id: "day_" + d.toLowerCase(),
+      label: d,
+      letter: d,
+    })),
+  },
+  manners: {
+    title: "Good Manners",
+    color: "magenta",
+    items: [
+      { id: "please", label: "Please", emoji: "🙏" },
+      { id: "thankyou", label: "Thank You", emoji: "🫶" },
+      { id: "welcome", label: "You're Welcome", emoji: "🤝" },
+      { id: "sorry", label: "Sorry", emoji: "😔" },
+      { id: "excuseme", label: "Excuse Me", emoji: "🙋" },
+      { id: "mayi", label: "May I?", emoji: "✋" },
+    ],
+  },
 };
 
 // Render a visual for any card item into a container element

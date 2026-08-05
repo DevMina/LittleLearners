@@ -9,7 +9,7 @@ const DEFAULT_SETTINGS = {
   sfx: true,
   sessionMinutes: 0,   // 0 = off
   reminderEnabled: false,
-  enabledDecks: ["animals", "colors", "numbers", "shapes", "letters"],
+  enabledDecks: ["animals", "colors", "numbers", "shapes", "letters", "days", "manners"],
 };
 
 function getSettings() {
